@@ -1,2 +1,4 @@
 *.tipsy
 very_old_stuff/
+.project
+.cproject

@@ -3,49 +3,54 @@ package ChaNGa;
 use base 'Exporter';
 our @EXPORT_OK = qw(%config $base_dir);
 
-our $base_dir = "$ENV{'HOME'}/ChaNGa/testdisk";
+our $base_dir = "$ENV{'HOME'}/ChaNGa/";
+
+my $max_threads = 14;  # Leave 1 for the OS and 1 for the Comm thread
+
+my @CPU_buckets = (16,24,32,64,96);
+my @GPU_buckets = (16,24,32,64,96,128,192,256);
 
 our %config = (
 	'CPU' => {
 			'150k' => {
-				'threads' => [14],
-				'bucketsize' => [16,24,32,64,96]
+				'threads_per_node' => [$max_threads],
+				'bucketsize' => \@CPU_buckets 
 			},
 			'1M' => {
-				'threads' => [14],
-				'bucketsize' => [16,24,32,64,96]
+				'threads_per_node' => [$max_threads],
+				'bucketsize' => \@CPU_buckets
 			},
 			'8M' => {
-				'threads' => [14],
-				'bucketsize' => [16,24,32,64,96]
+				'threads_per_node' => [$max_threads],
+				'bucketsize' => \@CPU_buckets
 			}
 		},
 	'GPU' => {
 		'150k' => {
-				'threads' => [1],
-				'bucketsize' => [16,24,32,64,96,128,160,192,224,256]
+				'threads_per_node' => [1,$max_threads],
+				'bucketsize' => \@GPU_buckets
 		},
 		'1M' => {
-			'threads' => [1],
-			'bucketsize' => [16,24,32,64,96,128,160,192,224,256]
+			'threads_per_node' => [1,$max_threads],
+			'bucketsize' => \@GPU_buckets
 		},
 		'8M' => {
-			'threads' => [1],
-			'bucketsize' => [16,24,32,64,96,128,160,192,224,256]
+			'threads_per_node' => [1,$max_threads],
+			'bucketsize' => \@GPU_buckets
 		}
 	},
 	'GPU-SMP' => {
 		'150k' => {
-				'threads' => [1,2,4,8,16],
-				'bucketsize' => [16,24,32,64,96,128,160,192,224,256]
+				'threads_per_node' => [1,2,4,8,$max_threads],
+				'bucketsize' => \@GPU_buckets
 		},
 		'1M' => {
-			'threads' => [1,2,4,8,16],
-			'bucketsize' => [16,24,32,64,96,128,160,192,224,256]
+			'threads_per_node' => [1,2,4,8,$max_threads],
+			'bucketsize' => \@GPU_buckets
 		},
 		'8M' => {
-			'threads' => [1,2,4,8,16],
-			'bucketsize' => [16,24,32,64,96,128,160,192,224,256]
+			'threads_per_node' => [1,2,4,8,$max_threads],
+			'bucketsize' => \@GPU_buckets
 		}
 	}
 );

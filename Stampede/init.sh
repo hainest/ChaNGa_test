@@ -1,4 +1,4 @@
 #!/bin/bash
 
 perl makeParamFiles.pl
-perl makeSbatchScripts.pl 4
+perl makeSbatchScripts.pl

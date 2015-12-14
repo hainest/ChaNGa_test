@@ -1,6 +1,5 @@
 use strict;
 use warnings;
-use Cwd qw(cwd);
 use ChaNGa qw(%config $base_dir);
 
 my $num_nodes      = $ARGV[0] // 4;
@@ -38,8 +37,25 @@ for my $type (keys %config) {
 			for my $theta ('0.1', '0.3', '0.5', '0.7', '0.9') {
 				for my $b (@{$config{$type}{$numparticles}{'bucketsize'}}) {
 					my $dir = "$type/$numparticles/$threads/$theta/$b";
-					my $p = $num_nodes * $threads;
+					my $p   = $num_nodes * $threads;
 					print $fdOut "$base_dir/$type/charmrun ++ppn $threads +p $p $base_dir/$type/ChaNGa -v 1 \"$dir/testdisk.param\"\n";
+				}
+			}
+		}
+	}
+
+	open $fdOut, '>', "${type}.acc.sbatch" or die;
+	$num_nodes = 1;
+	$tasks_per_node = 1;
+	$num_tasks = 1;
+	write_header($fdOut, $type, ($type =~ /GPU/) ? 'module load cuda/6.5' : '', $partition);
+
+	for my $numparticles (keys %{$config{$type}}) {
+		for my $threads (@{$config{$type}{$numparticles}{'threads_per_node'}}) {
+			for my $theta ('0.1', '0.3', '0.5', '0.7', '0.9') {
+				for my $b (@{$config{$type}{$numparticles}{'bucketsize'}}) {
+					my $dir = "$type/$numparticles/$threads/$theta/$b/acc";
+					print $fdOut "$base_dir/$type/charmrun ++ppn 1 +p 1 $base_dir/$type/ChaNGa -v 1 \"$dir/testdisk.param\"\n";
 				}
 			}
 		}

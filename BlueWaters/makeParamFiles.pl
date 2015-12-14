@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use File::Path qw(make_path);
+use File::Path qw(mkpath);
 use Cwd qw(cwd);
 use ChaNGa qw(%config $base_dir);
 
@@ -16,7 +16,7 @@ for my $type (keys %config) {
 
 					my $dir = "$base_dir/$type/$numparticles/$threads/$theta/$b";
 					my $suffix = "$type+$numparticles+$threads+$theta+$b";
-					make_path "$dir/acc" if (!-d "$dir/acc");
+					mkpath "$dir/acc" if (!-d "$dir/acc");
 
 					open my $fdOut, '>', "$dir/testdisk.param" or die "Unable to create $dir/testdisk.param: $!\n";
 					print $fdOut <<EOF
@@ -41,7 +41,7 @@ nSteps          = 0
 dDelta          = $maxStep
 dTheta          = $theta
 iOutInterval    = $nSteps
-achOutName      = $dir/acc/testdisk.acc.$suffix
+achOutName      = $dir/acc/testdisk.$suffix
 iLogInterval	= 1
 dEta			= 0.15491
 achInFile		= $dir/testdisk.$suffix

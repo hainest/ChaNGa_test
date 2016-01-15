@@ -2,29 +2,31 @@ use strict;
 use warnings;
 use File::Path qw(mkpath);
 use Cwd qw(cwd);
-use ChaNGa qw(%config $base_dir);
+use ChaNGa qw(%config $base_dir @theta);
 
-my $simTime        = 0.005;                      # 5 Myrs
-my $maxStep        = 0.001;                      # 1 Myr
-my $nSteps         = int($simTime / $maxStep);
+my $simTime = 0.005;                      # 5 Myrs
+my $maxStep = 0.001;                      # 1 Myr
+my $nSteps  = int($simTime / $maxStep);
 
 for my $type (keys %config) {
 	for my $numparticles (keys %{$config{$type}}) {
-		for my $threads (@{$config{$type}{$numparticles}{'threads_per_node'}}) {
-			for my $theta ('0.1', '0.3', '0.5', '0.7', '0.9') {
-				for my $b (@{$config{$type}{$numparticles}{'bucketsize'}}) {
+		for my $pes_per_node (@{$config{$type}{$numparticles}{'pes_per_node'}}) {
+			for my $threads (@{$config{$type}{$numparticles}{'threads_per_pe'}}) {
+				for my $t (@theta) {
+					for my $b (@{$config{$type}{$numparticles}{'bucketsize'}}) {
 
-					my $dir = "$base_dir/$type/$numparticles/$threads/$theta/$b";
-					my $suffix = "$type+$numparticles+$threads+$theta+$b";
-					mkpath "$dir/acc" if (!-d "$dir/acc");
+						my $dir    = "$base_dir/$type/$numparticles/$pes_per_node/$threads/$t/$b";
+						my $prefix = "$type+$numparticles+$pes_per_node+$threads+$t+$b";
+						mkpath "$dir/acc" if (!-d "$dir/acc");
 
-					open my $fdOut, '>', "$dir/testdisk.param" or die "Unable to create $dir/testdisk.param: $!\n";
-					print $fdOut <<EOF
+						open my $fdOut, '>', "$dir/${prefix}.param"
+						  or die "Unable to create $dir/${prefix}.param: $!\n";
+						print $fdOut <<EOF
 nSteps          = $nSteps
 dDelta          = $maxStep
-dTheta          = 0.5
+dTheta          = $t
 iOutInterval    = 100
-achOutName      = $dir/testdisk.$suffix
+achOutName      = $dir/$prefix.out
 iLogInterval	= 1
 dEta			= 0.15491
 achInFile		= $base_dir/testdisk.${numparticles}.tipsy
@@ -32,23 +34,24 @@ bDoDensity		= 0
 bPrefetch		= 1
 nBucket         = $b
 EOF
-					  ;
+						  ;
 
-					close $fdOut;
-					open $fdOut, '>', "$dir/acc/testdisk.param" or die;
-					print $fdOut <<EOF
+						close $fdOut;
+						open $fdOut, '>', "$dir/acc/$prefix.param" or die;
+						print $fdOut <<EOF
 nSteps          = 0
 dDelta          = $maxStep
-dTheta          = $theta
+dTheta          = $t
 iOutInterval    = $nSteps
-achOutName      = $dir/acc/testdisk.$suffix
+achOutName      = $dir/acc/$prefix.acc.out
 iLogInterval	= 1
 dEta			= 0.15491
-achInFile		= $dir/testdisk.$suffix
+achInFile		= $dir/$prefix.out
 bDoDensity		= 0
 bPrefetch		= 1
 EOF
-					  ;
+						  ;
+					}
 				}
 			}
 		}

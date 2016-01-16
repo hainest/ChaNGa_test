@@ -48,7 +48,7 @@ sub print_commands($$$$) {
 			for my $pes_per_node (@{$config{$type}{$numparticles}{'pes_per_node'}}) {
 				for my $t (@theta) {
 					for my $b (@{$config{$type}{$numparticles}{'bucketsize'}}) {
-						my $dir       = "$type/$numparticles/$threads/$t/$b";
+						my $dir       = "$type/$numparticles/$pes_per_node/$threads/$t/$b";
 						my $total_pes = $num_nodes * $threads * $pes_per_node;
 						my $prefix    = "$type+$numparticles+$pes_per_node+$threads+$t+$b";
 						print $fdOut "aprun -n $total_pes -N $pes_per_node -d $cpus_per_pe ";

@@ -13,35 +13,62 @@ our %config = (
 	'CPU' => {
 		'1M' => {
 			'threads_per_pe' => [1],
-			'pes_per_node'   => [32],
+			'pes_per_node'   => [31, 32],
 			'bucketsize'     => \@CPU_buckets
 		},
 		'4M' => {
 			'threads_per_pe' => [1],
-			'pes_per_node'   => [32],
+			'pes_per_node'   => [31, 32],
 			'bucketsize'     => \@CPU_buckets
 		}
 	},
-	'GPU' => {
+	'CPU-SMP' => {
+		'1M' => {
+			'threads_per_pe' => [31, 62],
+			'pes_per_node'   => [1],
+			'bucketsize'     => \@CPU_buckets
+		},
+		'4M' => {
+			'threads_per_pe' => [31, 62],
+			'pes_per_node'   => [1],
+			'bucketsize'     => \@CPU_buckets
+		}
+	},
+	# The non-SMP GPU version is severely broken. Because there is a GPU manager per PE,
+	# it doesn't know that other processes are trying to use the GPU and it overcommits
+	# the device memory. The fix is to use only 1 or 2 PEs per node.
+	'GPU1' => {
 		'1M' => {
 			'threads_per_pe' => [1],
-			'pes_per_node'   => [1, 32],
+			'pes_per_node'   => [1],
 			'bucketsize'     => \@GPU_buckets
 		},
 		'4M' => {
 			'threads_per_pe' => [1],
-			'pes_per_node'   => [1, 32],
+			'pes_per_node'   => [1],
+			'bucketsize'     => \@GPU_buckets
+		}
+	},
+	'GPU2' => {
+		'1M' => {
+			'threads_per_pe' => [1],
+			'pes_per_node'   => [2],
+			'bucketsize'     => \@GPU_buckets
+		},
+		'4M' => {
+			'threads_per_pe' => [1],
+			'pes_per_node'   => [2],
 			'bucketsize'     => \@GPU_buckets
 		}
 	},
 	'GPU-SMP' => {
 		'1M' => {
-			'threads_per_pe' => [1, 2, 8, 31, 62],
+			'threads_per_pe' => [1, 2, 8, 15, 30],
 			'pes_per_node'   => [1],
 			'bucketsize'     => \@GPU_buckets
 		},
 		'4M' => {
-			'threads_per_pe' => [1, 2, 8, 31, 62],
+			'threads_per_pe' => [1, 2, 8, 15, 30],
 			'pes_per_node'   => [1],
 			'bucketsize'     => \@GPU_buckets
 		}

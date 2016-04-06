@@ -1,3 +1,3 @@
 #!/bin/sh
 
-find . -name "*.log" | tar -zcf results.tar.gz -T -
+perl export_results.pl | tar -zcf results.tar.gz -T -

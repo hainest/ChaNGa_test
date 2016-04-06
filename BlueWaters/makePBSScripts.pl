@@ -36,7 +36,7 @@ for my $type (keys %config) {
 	open $fdOut, '>', "${type}.acc.pbs" or die;
 	$num_nodes = 1;
 
-	&print_header($type, $fdOut, $num_nodes, $cores_per_node, $server);
+	&print_header($type, $fdOut, $num_nodes, $cores_per_node, $server, 'acc');
 	print $fdOut "$module\n$mps\n";
 	&print_commands($type, $fdOut, $num_nodes, $cores_per_node, 'acc');
 }
@@ -69,14 +69,15 @@ sub print_commands() {
 }
 
 sub print_header() {
-	my ($type, $fdOut, $num_nodes, $cores_per_node, $server) = @_;
-
+	my ($type, $fdOut, $num_nodes, $cores_per_node, $server, $acc) = @_;
+	$acc //= '';
+	
 	print $fdOut qq(#!/bin/sh
 
 #PBS -l nodes=$num_nodes:ppn=$cores_per_node:$server
 #PBS -l walltime=00:47:59:00
-#PBS -e $type/stderr
-#PBS -o $type/stdout
+#PBS -e $type/stderr$acc
+#PBS -o $type/stdout$acc
 #PBS -M thaines\@astro.wisc.edu
 #PBS -m ae
 

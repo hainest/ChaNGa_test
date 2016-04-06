@@ -1,12 +1,13 @@
 use strict;
 use warnings;
 use File::Path qw(mkpath);
-use Cwd qw(cwd);
 use ChaNGa qw(%config $base_dir @theta);
 
 my $simTime = 0.005;                      # 5 Myrs
 my $maxStep = 0.001;                      # 1 Myr
 my $nSteps  = int($simTime / $maxStep);
+
+my $snapshot_suffix = sprintf('%06s',int($simTime*1e3));
 
 for my $type (keys %config) {
 	for my $numparticles (keys %{$config{$type}}) {
@@ -46,7 +47,7 @@ iOutInterval    = $nSteps
 achOutName      = $dir/acc/$prefix.acc.out
 iLogInterval	= 1
 dEta			= 0.15491
-achInFile		= $dir/$prefix.out
+achInFile		= $dir/$prefix.out.$snapshot_suffix
 bDoDensity		= 0
 bPrefetch		= 1
 EOF

@@ -26,13 +26,12 @@ our %config = (
 #	},
 	'CPU-SMP' => {
 		'1M' => {
-#			'threads_per_pe' => [16, 31],
 			'threads_per_pe' => [31],
 			'pes_per_node'   => [1],
 			'bucketsize'     => \@CPU_buckets
 		},
 #		'4M' => {
-#			'threads_per_pe' => [16, 31],
+#			'threads_per_pe' => [31],
 #			'pes_per_node'   => [1],
 #			'bucketsize'     => \@CPU_buckets
 #		}

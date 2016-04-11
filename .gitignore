@@ -3,3 +3,5 @@ very_old_stuff/
 .project
 .cproject
 *.txt
+Stampede/nvprof
+BlueWaters/results

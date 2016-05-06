@@ -1,63 +1,67 @@
 use strict;
 use warnings;
+use ChaNGa qw(%config @theta %size_decode);
 use PDL;
+use PDL::NiceSlice;
 use PDL::Graphics2D;
 use PGPLOT;
-use Getopt::Long;
 
-#my $useGadget;
-#GetOptions('g'=>\$useGadget);
-
-my $numPart = 150000;
-my @theta = (0.1,0.3,0.5,0.7,0.9);
+my $base_dir = 'results';
+my $num_particles = '1M';
+my @types = sort keys %config;
+my @colors = ('red','blue','green','orange', 'magenta', 'steelblue');
+my @symbol_sizes = (6,5,4,3,2,1);
 my $theta_pdl = pdl(\@theta);
-my @types = ('ChaNGa','ChaNGa_GPU','ChaNGa_GPU_multithread','Gadget3');
-my @colors = ('red','blue','green','orange');
 
-# Standard of comparison is ChaNGa with theta=0.1
-my $actual = rfits('ChaNGa/acc.fits')->slice(':,:,(0)');
-my $mag_actual = sqrt(sumover(xchg($actual**2,0,1)));
+# Comparison is CPU with theta=0.1
+my $comparison = rfits("$base_dir/CPU/$num_particles.acc.fits")->slice(':,:,(0)');
+my $comparison_mag = PDL::sqrt(sumover(xchg($comparison,0,1)**2.0));
 
-#if($useGadget) {
-	#@types = ('../Gadget3');
-	#$actual = rfits('../Gadget3/acc.fits')->slice(':,:,(0)');
-	#$mag_actual = sqrt(sumover(xchg($actual**2,0,1)));
-#}
-
-my $rms = zeros(scalar @theta,scalar @types);
+my $rms = zeros(scalar @theta, scalar @types);
 
 for my $i (0..@types-1) {
-	$rms->slice(":,($i)") .= &calc_error($types[$i],rfits("$types[$i]/acc.fits"));
+	print "Opening $base_dir/$types[$i]/$num_particles.acc.fits\n";
+	my $data = rfits("$base_dir/$types[$i]/$num_particles.acc.fits");
+	my $mag = PDL::sqrt(sumover(xchg($data-$comparison,0,1)**2.0));
+	$rms(:,($i)) .= PDL::sqrt(sumover(($mag/$comparison_mag)**2.0)/$size_decode{$num_particles});
 }
 
-my $win = PDL::Graphics2D->new('PGPLOT',{'device'=>'force_test.png/png'});
+print "$rms\n";
 
-my @envLimits = minmax($rms);
-$win->env(0,1,@envLimits, {
-	'border'=>{'type'=>'rel','value'=>0.03},
-	'charsize'=>0.9
+my $win = PDL::Graphics2D->new('PGPLOT',{'device'=>'force_test.ps/cps'});
+
+my @x_limits = minmax($theta_pdl);
+my $mask = ones(dims($rms));
+$mask(0,0) .= 0;
+my $y = zeros(dims($rms));
+whereND($y,$mask) .= PDL::log10(whereND($rms,$mask))+4;
+my @y_limits = minmax(whereND($y,$mask));
+
+$win->env(@x_limits,@y_limits, {
+	'border'=>{'type'=>'rel','value'=>0.06},
+	'charsize'=>0.9,
+	'axis' => 'LOGY'
 });
 
-$win->tpoints($theta_pdl,$rms,{'color'=>\@colors,'SymbolSize'=>[5,3,1]});
+for my $i (0..@types-1) {
+	my $type = $types[$i];
+	my $c = $colors[$i];
+	my $ss = $symbol_sizes[$i];
+	for my $j (0..@theta-1) {
+		my $t = $theta[$j];
+		next if $type eq 'CPU' && $j == 0;
+		$win->hold();
+		$win->points($t,$y($j,$i),{'color'=>$c,'SymbolSize'=>$ss});
+		$win->release();
+	}
+}
 
 pgsch(0.9);
-pgmtxt('L',2.7,0.5,0.5,'RMS Error');
+pgmtxt('L',2.7,0.5,0.5,'log(RMS Error) + 4');
 pgmtxt('B',2.7,0.5,0.5,'Opening Angle (\gh)');
-$win->legend(\@types,0.2,$envLimits[0]+0.8*$envLimits[1],{
+$win->legend([map {s/WangKernelTest/Wang/gi; $_;} @types],0.2,PDL::log10(10**$y_limits[0]+0.8*10**$y_limits[1]),{
 	'color'=>\@colors,
 	'TextFraction'=>0.8,
 	'linewidth'=>[(6)x scalar @colors],
 	'charsize'=>1.2
 });
-
-$win->release();
-$win->close();
-
-sub calc_error() {
-	my ($type,$data) = @_;
-	
-	my $mag = sqrt(sumover(xchg(($data-$actual)**2,0,1)));
-	my $rms = sqrt(sumover(($mag/$mag_actual)**2)/$numPart);
-	#print "$type min/max = ", join(',',map {sprintf('%6.9e',$_)} minmax($rms)), "\n";
-	return $rms;
-}

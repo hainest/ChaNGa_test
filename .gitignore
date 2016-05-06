@@ -5,3 +5,8 @@ very_old_stuff/
 *.txt
 Stampede/nvprof
 BlueWaters/results
+*.csv
+*.png
+*.ps
+__pycache__
+.pydevproject

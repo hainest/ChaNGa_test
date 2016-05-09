@@ -44,7 +44,7 @@ our %config = (
 		'threads_per_pe' => 1,
 		'bucketsize'     => \@GPU_buckets
 	},
-	'GPU-SMP-Simon+Wang' => {
+	'GPU-SMP-Wang+Simon' => {
 		'pes_per_node'   => 1,
 		'cores_per_pe'   => 15,
 		'threads_per_pe' => 1,

@@ -9,7 +9,9 @@ use PGPLOT;
 my $base_dir = 'results';
 my $num_particles = '1M';
 my @types = sort keys %config;
-my @colors = ('red','blue','green','orange', 'magenta', 'steelblue');
+#colors = ('red', 'blue', 'orange', 'darkviolet', 'green', 'coral')
+my @colors = ('red','blue','orange','purple', 'green', 'coral');
+
 my @symbol_sizes = (6,5,4,3,2,1);
 my $theta_pdl = pdl(\@theta);
 
@@ -26,9 +28,7 @@ for my $i (0..@types-1) {
 	$rms(:,($i)) .= PDL::sqrt(sumover(($mag/$comparison_mag)**2.0)/$size_decode{$num_particles});
 }
 
-print "$rms\n";
-
-my $win = PDL::Graphics2D->new('PGPLOT',{'device'=>'force_test.ps/cps'});
+my $win = PDL::Graphics2D->new('PGPLOT',{'device'=>'force_test.ps/cps', 'WindowWidth'=>5, 'AspectRatio'=>8.5/11.0});
 
 my @x_limits = minmax($theta_pdl);
 my $mask = ones(dims($rms));

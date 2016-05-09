@@ -58,6 +58,6 @@ plt.xticks(indices, theta)
 plt.yticks(())
 plt.ylim((0.0, 1.3))
 plt.xlabel(r'$\theta$ (opening angle)')
-plt.ylabel('time per step (s)')
+plt.ylabel(r'$\left\langle t_{{\rm step}}\right\rangle\,(s)$')
 
 plotting.save_fig(fig, 'timings.png')

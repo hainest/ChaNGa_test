@@ -10,10 +10,8 @@ sub execute($) {
 }
 
 my ($cuda, $charm, $changa) = ('',	1, 1);
-GetOptions('with-cuda' => \$cuda, 'with-charm' => \$charm, 'with-changa' => \$changa);
+GetOptions('with-cuda' => \$cuda, 'charm!' => \$charm, 'changa!' => \$changa);
 $cuda = 'cuda' if $cuda;
-
-print "cuda = $cuda, charm = $charm, changa = $changa\n"; exit;
 
 if ($charm) {
 	execute("

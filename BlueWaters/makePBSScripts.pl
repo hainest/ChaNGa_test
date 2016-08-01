@@ -59,7 +59,7 @@ sub print_commands() {
 						my $total_pes = $num_nodes * $pes_per_node;
 						my $prefix    = "$type+$numparticles+$pes_per_node+$threads+$t+$b";
 						print $fdOut "aprun -n $total_pes -N $pes_per_node -d $cores_per_pe ";
-						print $fdOut "$base_dir/src/$type/changa/ChaNGa $smp -v 1 $base_dir/$dir/${prefix}.param ";
+						print $fdOut "$base_dir/$type/ChaNGa $smp -v 1 $base_dir/$dir/${prefix}.param ";
 						print $fdOut "1>$base_dir/$dir/stdout 2>$base_dir/$dir/stderr\n";
 					}
 				}

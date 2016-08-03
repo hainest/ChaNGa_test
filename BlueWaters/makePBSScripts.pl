@@ -4,9 +4,9 @@ use Cwd qw(cwd);
 use ChaNGa qw(%config $base_dir @theta @size);
 use Getopt::Long qw(GetOptions);
 
-my $runtime_hours = 4;
+my $walltime = '00:04:00:00';
 my $total_cores = 64;
-GetOptions('hours=i' => \$runtime_hours, 'ncores=i' => \$total_cores);
+GetOptions('time=s' => \$walltime, 'ncores=i' => \$total_cores);
 
 for my $type (keys %config) {
 	open my $fdOut, '>', "${type}.pbs" or die;
@@ -73,7 +73,7 @@ sub print_header() {
 	print $fdOut qq(#!/bin/sh
 
 #PBS -l nodes=$num_nodes:ppn=$cores_per_node:$server
-#PBS -l walltime=00:${runtime_hours}:00:00
+#PBS -l walltime=${walltime}
 #PBS -e $type/stderr$acc
 #PBS -o $type/stdout$acc
 #PBS -M thaines\@astro.wisc.edu

@@ -2,3 +2,7 @@
 very_old_stuff/
 .project
 .cproject
+.pydevproject
+BlueWaters/results
+BlueWaters/processAccFiles
+*.csv

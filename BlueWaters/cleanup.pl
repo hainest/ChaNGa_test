@@ -11,7 +11,7 @@ if (@ARGV < 1) {
 	die "Usage: $0 suffix [base_dir] [--remove-snapshot]\n";
 }
 
-my $snapshot_suffix = $ARGV[0];
+my $snapshot_suffix = shift @ARGV;
 $base_dir = $ARGV[1] if @ARGV;
 
 for my $type (keys %config) {

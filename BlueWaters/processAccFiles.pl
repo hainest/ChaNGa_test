@@ -18,7 +18,6 @@ for my $type ( keys %config ) {
 				my $dir    = "$base_dir/$type/$numparticles/$threads/$t/$b/acc";
 				my $prefix = "$type+$numparticles+$threads+$t+$b";
 				my $input_file = "$dir/$prefix.acc.dat";
-
 				print "Processing $input_file\n";
 				$acc ( :, :, ($i) ) .= readfraw($input_file);
 			}

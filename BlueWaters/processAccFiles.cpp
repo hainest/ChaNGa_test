@@ -25,14 +25,18 @@ int main() {
 	const std::string base_dir = "results/";
 	const std::vector<std::string> theta({"0.1", "0.2", "0.3", "0.4", "0.5", "0.7", "0.9"});
 	std::unordered_map<std::string, std::string> config = {
-//	    {"CPU", "1"},
-//		{"CPU-SMP", "30"},
-//		{"GPU-SMP", "1"},
-//		{"GPU-SMP-Wang", "1"},
-//		{"GPU-SMP-Simon", "1"},
-//		{"GPU-SMP-Wang+Simon", "1"},
-//		{"GPU-SMP_original", "1"},
-//		{"GPU-SMP-SP", "1"}
+		{"CPU", "1"},
+		{"CPU-rebase", "1"},
+		{"CPU-SMP", "30"},
+		{"CPU-SMP-SP", "30"},
+		{"CPU-SMP-SP-rebase", "30"},
+		{"CPU-SMP-rebase", "30"},
+		{"GPU-SMP", "1"},
+		{"GPU-SMP-rebase", "1"},
+		{"GPU-SMP-SP", "1"},
+		{"GPU-SMP-SP-rebase", "1"},
+		{"GPU-SMP-SW", "1"},
+		{"GPU-SMP-SW-rebase", "1"}
 	};
 
 	for (auto const &type : keys(config)) {
@@ -63,6 +67,15 @@ int main() {
 					fout.write(reinterpret_cast<char *>(x.data()),
 						   static_cast<std::streamsize>(x.size() * sizeof(decltype(x)::value_type)));
 
+					/*************************************************
+					 * http://pdl.perl.org/PDLdocs/IO/FastRaw.html
+					 *
+					 *  The format of the ASCII header is simply
+					 *
+					 *    <typeid>
+					 *    <ndims>
+					 *    <dim0> <dim1> ...
+					 *************************************************/
 					std::ofstream hdr{input_file + ".dat.hdr"};
 					hdr << 6 << '\n' << 2 << '\n' << N << ' ' << 3 << '\n';
 				}

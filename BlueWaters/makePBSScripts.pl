@@ -4,39 +4,30 @@ use Cwd qw(cwd);
 use ChaNGa qw(%config $base_dir @theta @size);
 use Getopt::Long qw(GetOptions);
 
-my $walltime = '00:04:00:00';
+my ($cpu_time, $gpu_time) = ('00:04:30:00', '00:01:00:00');
 my $total_cores = 64;
-GetOptions('time=s' => \$walltime, 'ncores=i' => \$total_cores);
+GetOptions('cpu_time=s' => \$cpu_time, 'gpu_time=s' => \$gpu_time);
 
 for my $type (keys %config) {
 	open my $fdOut, '>', "${type}.pbs" or die;
 
-	my ($module, $mps, $server, $cores_per_node) = ('', '', 'xe', 32);
+	my ($module, $mps, $server, $cores_per_node, $time) = ('', '', 'xe', 32, $cpu_time);
 
 	if ($type =~ /gpu/i) {
 		$module         = 'module load cudatoolkit/7.5.18-1.0502.10743.2.1';
 		$server         = 'xk';
 		$cores_per_node = 16;
+		$time			= $gpu_time;
 #		$mps = "export CRAY_CUDA_MPS=1\n";
 	}
 
 	my $num_nodes = $total_cores / $cores_per_node;
 	
-	&print_header($type, $fdOut, $num_nodes, $cores_per_node, $server);
+	&print_header($type, $fdOut, $num_nodes, $cores_per_node, $server, $time);
 	print $fdOut "$module\n$mps\n";
 	&print_commands($type, $fdOut, $num_nodes, $cores_per_node);
-
-	open $fdOut, '>', "${type}.acc.pbs" or die;
-
-	&print_header($type, $fdOut, $num_nodes, $cores_per_node, $server, 'acc');
-	print $fdOut "$module\n$mps\n";
+	print $fdOut "\n\n";
 	&print_commands($type, $fdOut, $num_nodes, $cores_per_node, 'acc');
-}
-
-sub max($$) {
-	my ($x,$y) = @_;
-	return $x if($x >= $y);
-	return $y;
 }
 
 sub print_commands() {
@@ -67,19 +58,19 @@ sub print_commands() {
 }
 
 sub print_header() {
-	my ($type, $fdOut, $num_nodes, $cores_per_node, $server, $acc) = @_;
-	$acc //= '';
+	my ($type, $fdOut, $num_nodes, $cores_per_node, $server, $time) = @_;
 	
 	print $fdOut qq(#!/bin/sh
 
 #PBS -l nodes=$num_nodes:ppn=$cores_per_node:$server
-#PBS -l walltime=${walltime}
-#PBS -e $type/stderr$acc
-#PBS -o $type/stdout$acc
+#PBS -l walltime=${time}
+#PBS -e $type/stderr
+#PBS -o $type/stdout
 #PBS -M thaines\@astro.wisc.edu
 #PBS -m ae
 
 export HUGETLB_DEFAULT_PAGE_SIZE=8M
 module load craype-hugepages8M
+
 );
 }

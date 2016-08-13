@@ -6,7 +6,7 @@ use Getopt::Long qw(GetOptions);
 
 my ($cpu_time, $gpu_time) = ('00:04:30:00', '00:01:00:00');
 my $total_cores = 64;
-GetOptions('cpu_time=s' => \$cpu_time, 'gpu_time=s' => \$gpu_time);
+GetOptions('cpu_time=s' => \$cpu_time, 'gpu_time=s' => \$gpu_time) or exit;
 
 for my $type (keys %config) {
 	open my $fdOut, '>', "${type}.pbs" or die;

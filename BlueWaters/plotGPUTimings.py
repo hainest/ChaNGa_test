@@ -15,10 +15,12 @@ timings = np.genfromtxt('timings.csv', delimiter=',', usecols=(1, 2, 3, 4, 5, 6,
 timings_gravity = np.genfromtxt('timings_gravity.csv', delimiter=',', usecols=(1, 2, 3, 4, 5, 6, 7))
 
 # Remove CPU timings
-timings = np.delete(timings, [types.index('CPU'), types.index('CPU-SMP')], 0)
-timings_gravity = np.delete(timings_gravity, [types.index('CPU'), types.index('CPU-SMP')], 0)
+indices_to_delete = [types.index('CPU'), types.index('CPU-SMP'), types.index('CPU-SMP-SP')]
+timings = np.delete(timings, indices_to_delete, 0)
+timings_gravity = np.delete(timings_gravity, indices_to_delete, 0)
 types.remove('CPU')
 types.remove('CPU-SMP')
+types.remove('CPU-SMP-SP')
 gpu_index = types.index('GPU-SMP')
 
 fig, ax = plotting.make_fig(size=(5, 3.8))
@@ -28,7 +30,7 @@ spacer = 0.1 * bar_width
 alpha = 0.7
 indices = np.arange(len(theta))
 offsets = np.arange(len(types)) * bar_width + spacer
-colors = ('orange', 'darkviolet', 'green', 'coral')
+colors = ('red', 'orange', 'darkviolet', 'green', 'coral', 'blue', 'darkgrey')
 
 gpu_time = timings[gpu_index, :]
 scaled_timings = timings / gpu_time

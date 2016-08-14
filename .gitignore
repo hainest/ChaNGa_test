@@ -9,3 +9,6 @@ BlueWaters/processAccFiles
 *.png
 *.xml
 *.ps
+__pycache__/
+stuff.pl
+change_type.pl

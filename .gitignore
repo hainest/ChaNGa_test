@@ -6,3 +6,6 @@ very_old_stuff/
 BlueWaters/results
 BlueWaters/processAccFiles
 *.csv
+*.png
+*.xml
+*.ps

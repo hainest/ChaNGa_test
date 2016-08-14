@@ -15,6 +15,12 @@ my @GPU_buckets = (128);
 
 # Everything is done in SMP mode
 our %config = (
+	'CPU' => {
+		'pes_per_node'   => 30,
+		'cores_per_pe'   => 1,             # leave one for OS
+		'threads_per_pe' => 1,             # leave one for comm thread
+		'bucketsize'     => \@CPU_buckets
+	},
 	'CPU-SMP' => {
 		'pes_per_node'   => 1,
 		'cores_per_pe'   => 31,             # leave one for OS

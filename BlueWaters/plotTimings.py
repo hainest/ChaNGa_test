@@ -22,7 +22,7 @@ spacer = 0.1 * bar_width
 alpha = 0.7
 indices = np.arange(len(theta))
 offsets = np.arange(len(types)) * bar_width + spacer 
-colors = ('red', 'blue', 'orange', 'darkviolet', 'green', 'coral')
+colors = ('red','blue','orange','DarkViolet', 'green', 'coral', 'lavender', 'magenta')
 
 cpu_time = timings[cpu_index, :]
 scaled_timings = timings / cpu_time
@@ -33,7 +33,7 @@ grav_frac = timings_gravity / timings
 for i in indices:
 	plt.bar(i + offsets, non_gravity_timings[:, i], width=bar_width, alpha=alpha, color=colors)
 	plt.bar(i + offsets, scaled_timings_gravity[:, i], width=bar_width, alpha=alpha, color='white', edgecolor=colors, bottom=non_gravity_timings[:, i], hatch='//')
-	plt.text(i, 1.02 * scaled_timings[cpu_index, i], '{0:.2f}'.format(timings[cpu_index, i]), fontsize=8)
+	plt.text(i, 1.07 * scaled_timings[cpu_index, i], '{0:.2f}'.format(timings[cpu_index, i]), fontsize=8)
 	
 	for j in range(len(types)):
 		y = non_gravity_timings[j, i] + 0.5 * scaled_timings_gravity[j, i]
@@ -56,7 +56,7 @@ plt.text(indices[-1] + 0.75, 0.125, '8x', color=grey, fontsize=7)
 
 plt.xticks(indices, theta)
 plt.yticks(())
-plt.ylim((0.0, 1.3))
+plt.ylim((0.0, 1.4))
 plt.xlabel(r'$\theta$ (opening angle)')
 plt.ylabel(r'$\left\langle t_{{\rm step}}\right\rangle\,(s)$')
 

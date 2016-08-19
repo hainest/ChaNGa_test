@@ -9,10 +9,9 @@ use PGPLOT;
 my $base_dir = 'results';
 my $num_particles = '1M';
 my @types = sort keys %config;
-#colors = ('red', 'blue', 'orange', 'darkviolet', 'green', 'coral')
 my @colors = ('red','blue','orange','DarkViolet', 'green', 'coral', 'lavender', 'magenta');
 
-my @symbol_sizes = (7,7,6,5,4,3,2,1);
+my @symbol_sizes = reverse list(sequence(scalar @types) + 1.5);
 my $theta_pdl = pdl(\@theta);
 
 # Comparison is CPU with theta=0.1

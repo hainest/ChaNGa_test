@@ -1,14 +1,12 @@
 *.tipsy
-very_old_stuff/
 .project
 .cproject
 .pydevproject
-BlueWaters/results
-BlueWaters/processAccFiles
 *.csv
 *.png
 *.xml
 *.ps
 __pycache__/
 stuff.pl
-change_type.pl
+src/
+results/

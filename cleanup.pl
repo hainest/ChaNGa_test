@@ -15,10 +15,10 @@ my $snapshot_suffix = shift @ARGV;
 $base_dir = $ARGV[1] if @ARGV;
 
 for my $type (keys %config) {
-my $threads = $config{$type}{'threads_per_pe'};
 for my $numparticles (@size) {
 for my $t (@theta) {
 for my $b (@{$config{$type}{'bucketsize'}}) {
+for my $threads ($config{$type}{'threads_per_pe'}) {
 	my $prefix  = "$type+$numparticles+$threads+$t+$b";
 	my $dir     = "$base_dir/$type/$numparticles/$threads/$t/$b/";
 
@@ -30,4 +30,4 @@ for my $b (@{$config{$type}{'bucketsize'}}) {
 	unlink "$dir/acc/$prefix.acc.out.000000.key";
 	unlink "$dir/acc/$prefix.acc.out.000000.rung";
 	}
-}}}
+}}}}

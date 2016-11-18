@@ -35,7 +35,7 @@ sub print_commands() {
 	$ext //= '';
 	my $pes_per_node = $config{$type}{'pes_per_node'};
 
-	my $threads = $config{$type}{'threads_per_pe'};
+	for my $threads ($config{$type}{'threads_per_pe'}) {
 	for my $numparticles (@size) {
 		my $cores_per_pe = $config{$type}{'cores_per_pe'};
 		
@@ -54,7 +54,7 @@ sub print_commands() {
 				print $fdOut "1>$base_dir/$dir/stdout 2>$base_dir/$dir/stderr\n";
 			}
 		}
-	}
+	}}
 }
 
 sub print_header() {

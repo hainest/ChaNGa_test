@@ -18,43 +18,31 @@ our %config = (
 #	'CPU' => {
 #		'pes_per_node'   => 30,
 #		'cores_per_pe'   => 1,             # leave one for OS
-#		'threads_per_pe' => 1,             # leave one for comm thread
+#		'threads_per_pe' => [1],           # leave one for comm thread
 #		'bucketsize'     => \@CPU_buckets
 #	},
 #	'CPU-SMP' => {
 #		'pes_per_node'   => 1,
 #		'cores_per_pe'   => 31,             # leave one for OS
-#		'threads_per_pe' => 30,             # leave one for comm thread
+#		'threads_per_pe' => [30],           # leave one for comm thread
 #		'bucketsize'     => \@CPU_buckets
 #	},
 #	'CPU-SMP-SP' => {
 #		'pes_per_node'   => 1,
 #		'cores_per_pe'   => 31,
-#		'threads_per_pe' => 30,
+#		'threads_per_pe' => [30],
 #		'bucketsize'     => \@CPU_buckets
 #	},
 	'GPU-SMP' => {
 		'pes_per_node'   => 1,
 		'cores_per_pe'   => 15,
-		'threads_per_pe' => 1,
+		'threads_per_pe' => [1],
 		'bucketsize'     => \@GPU_buckets
 	},
 #	'GPU-SMP-SP' => {
 #		'pes_per_node'   => 1,
 #		'cores_per_pe'   => 15,
-#		'threads_per_pe' => 1,
+#		'threads_per_pe' => [1],
 #		 'bucketsize'     => \@GPU_buckets
-#	},
-#	'GPU-SMP-SW' => {
-#		'pes_per_node'   => 1,
-#		'cores_per_pe'   => 15,
-#		'threads_per_pe' => 1,
-#		'bucketsize'     => \@GPU_buckets
-#	},
-#	'GPU-SMP-SW-SP' => {
-#		'pes_per_node'   => 1,
-#		'cores_per_pe'   => 15,
-#		'threads_per_pe' => 1,
-#		'bucketsize'     => \@GPU_buckets
 #	}
 );

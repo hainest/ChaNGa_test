@@ -12,7 +12,7 @@ my $timings_gravity = zeros( dims($timings) );
 
 for my $i ( 0 .. @types - 1 ) {
 	my $type    = $types[$i];
-	my $threads = $config{$type}{'threads_per_pe'};
+	for my $threads ($config{$type}{'threads_per_pe'}) {
 	for my $numparticles (@size) {
 		my @times = ();
 		for my $j ( 0 .. @theta - 1 ) {
@@ -34,7 +34,7 @@ for my $i ( 0 .. @types - 1 ) {
 			@times = ();
 		}
 	}
-}
+}}
 
 open my $fdOut, '>', 'timings.csv';
 print $fdOut '# theta: ', join( ',', @theta ), "\n";

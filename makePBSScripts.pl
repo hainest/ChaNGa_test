@@ -11,20 +11,17 @@ GetOptions('cpu_time=s' => \$cpu_time, 'gpu_time=s' => \$gpu_time) or exit;
 for my $type (keys %config) {
 	open my $fdOut, '>', "${type}.pbs" or die;
 
-	my ($module, $mps, $server, $cores_per_node, $time) = ('', '', 'xe', 32, $cpu_time);
+	my ($server, $cores_per_node, $time) = ('xe', 32, $cpu_time);
 
 	if ($type =~ /gpu/i) {
-		$module         = 'module load cudatoolkit/7.5.18-1.0502.10743.2.1';
 		$server         = 'xk';
 		$cores_per_node = 16;
 		$time			= $gpu_time;
-#		$mps = "export CRAY_CUDA_MPS=1\n";
 	}
 
 	my $num_nodes = $total_cores / $cores_per_node;
 	
 	&print_header($type, $fdOut, $num_nodes, $cores_per_node, $server, $time);
-	print $fdOut "$module\n$mps\n";
 	&print_commands($type, $fdOut, $num_nodes, $cores_per_node);
 	print $fdOut "\n\n";
 	&print_commands($type, $fdOut, $num_nodes, $cores_per_node, 'acc');
@@ -35,7 +32,7 @@ sub print_commands() {
 	$ext //= '';
 	my $pes_per_node = $config{$type}{'pes_per_node'};
 
-	for my $threads ($config{$type}{'threads_per_pe'}) {
+	for my $threads (@{$config{$type}{'threads_per_pe'}}) {
 	for my $numparticles (@size) {
 		my $cores_per_pe = $config{$type}{'cores_per_pe'};
 		
@@ -45,15 +42,14 @@ sub print_commands() {
 		}
 		
 		for my $t (@theta) {
-			for my $b (@{$config{$type}{'bucketsize'}}) {
-				my $dir       = "$type/$numparticles/$threads/$t/$b/$ext";
-				my $total_pes = $num_nodes * $pes_per_node;
-				my $prefix    = "$type+$numparticles+$threads+$t+$b";
-				print $fdOut "aprun -n $total_pes -N $pes_per_node -d $cores_per_pe ";
-				print $fdOut "$base_dir/src/$type/changa/ChaNGa $smp -v 1 $base_dir/$dir/${prefix}.param ";
-				print $fdOut "1>$base_dir/$dir/stdout 2>$base_dir/$dir/stderr\n";
-			}
-		}
+		for my $b (@{$config{$type}{'bucketsize'}}) {
+			my $dir       = "$type/$numparticles/$threads/$t/$b/$ext";
+			my $total_pes = $num_nodes * $pes_per_node;
+			my $prefix    = "$type+$numparticles+$threads+$t+$b";
+			print $fdOut "aprun -n $total_pes -N $pes_per_node -d $cores_per_pe ";
+			print $fdOut "$base_dir/src/$type/changa/ChaNGa $smp -v 1 $base_dir/$dir/${prefix}.param ";
+			print $fdOut "1>$base_dir/$dir/stdout 2>$base_dir/$dir/stderr\n";
+		}}
 	}}
 }
 

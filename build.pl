@@ -9,7 +9,13 @@ sub execute($) {
 	croak "\n\nError executing \n\t'$cmd'\n\n" if ( ( $? >> 8 ) != 0 || $? == -1 || ( $? & 127 ) != 0 );
 }
 
-my ( $cuda, $charm, $changa, $clean, $smp, $float, $njobs ) = ( '', 1, 1, 0 , 1, 0, 2);
+my %simd_decode = (
+	'none' => '',
+	'sse' => '--enable-sse',
+	'avx' => '--enable-avx'
+);
+
+my ( $cuda, $charm, $changa, $clean, $smp, $float, $njobs, $hex, $simd ) = ( '', 1, 1, 0, 1, 0, 2, 1, 'none');
 GetOptions(
 	'with-cuda' => \$cuda,
 	'charm!'    => \$charm,
@@ -17,11 +23,15 @@ GetOptions(
 	'clean'     => \$clean,
 	'smp!'		=> \$smp,
 	'float'		=> \$float,
-	'njobs=i'	=> \$njobs
+	'njobs=i'	=> \$njobs,
+	'hex!'		=> \$hex,
+	'simd=s'	=> \$simd
 ) or exit;
 $cuda = 'cuda' if $cuda;
 $smp  = ($smp) ? 'smp' : '';
 $float = ($float) ? '--enable-float' : '';
+$hex = ($hex) ? '' : '--disable-hexadecapole';
+die "Unknown simd type: $simd\n" if !exists $simd_decode{$simd};
 
 if ($charm) {
 	if ($clean) {
@@ -51,7 +61,7 @@ if ($changa) {
 	my $cuda_conf = ($cuda) ? "--with-cuda=$ENV{CRAY_CUDATOOLKIT_DIR}" : '';
 	execute( "
 		cd changa
-		./configure $cuda_conf $float
+		./configure $cuda_conf $float $hex $simd_decode{$simd}
 		make -j$njobs
 	" );
 }

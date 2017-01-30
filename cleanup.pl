@@ -1,33 +1,22 @@
 use strict;
 use warnings;
-use File::Copy qw(move);
+use Cwd qw(cwd);
+use ChaNGa qw(get_all_options);
+
 use Getopt::Long qw(GetOptions);
-use ChaNGa qw(%config $base_dir @theta @size);
 
 my $remove_snapshot = 0;
-GetOptions('remove-snapshot!' => \$remove_snapshot);
+my $base_dir = cwd();
 
-if (@ARGV < 1) {
-	die "Usage: $0 suffix [base_dir] [--remove-snapshot]\n";
+GetOptions(
+	'remove-snapshot!' => \$remove_snapshot,
+	'base_dir=s', \$base_dir
+);
+
+my $snapshot_suffix = sprintf('%06s',int($ChaNGa::sim_time*1e3));
+
+for my $o ( get_all_options() ) {
+	my $dir = "$base_dir/" . join('/', $o->listify);
+	unlink glob "$dir/acc/acc.out.*";
+	unlink "$dir/out.$snapshot_suffix" if $remove_snapshot;
 }
-
-my $snapshot_suffix = shift @ARGV;
-$base_dir = $ARGV[1] if @ARGV;
-
-for my $type (keys %config) {
-for my $numparticles (@size) {
-for my $t (@theta) {
-for my $b (@{$config{$type}{'bucketsize'}}) {
-for my $threads ($config{$type}{'threads_per_pe'}) {
-	my $prefix  = "$type+$numparticles+$threads+$t+$b";
-	my $dir     = "$base_dir/$type/$numparticles/$threads/$t/$b/";
-
-	move("$dir/acc/$prefix.acc.out.000000.acc2","$dir/acc/$prefix.acc");
-	unlink "$dir/$prefix.out.$snapshot_suffix" if $remove_snapshot;
-
-	unlink "$dir/acc/$prefix.acc.out.000000";
-	unlink "$dir/acc/$prefix.acc.out.000000.dom";
-	unlink "$dir/acc/$prefix.acc.out.000000.key";
-	unlink "$dir/acc/$prefix.acc.out.000000.rung";
-	}
-}}}}

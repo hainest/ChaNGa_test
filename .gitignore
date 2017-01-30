@@ -1,7 +1,9 @@
-*.tipsy
 .project
 .cproject
 .pydevproject
+*.o
+*.so
+*.tipsy
 *.csv
 *.png
 *.xml

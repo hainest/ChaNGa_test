@@ -49,8 +49,8 @@ for my $o (grep {$_->type eq $type && $_->smp eq $smp} @perms) {
 #PBS -M thaines\@astro.wisc.edu
 #PBS -m ae
 
-cwd=$options{'base_dir'}
-aprun -n 1 -N 1 -d 10 perl -I\$cwd \$cwd/build_driver.pl --prefix=\$cwd --inc_dir=\$cwd --build_dir=\$cwd/src --charm_dir=\$cwd/src/charm --changa_dir=\$cwd/src/changa --njobs=10 1>\$cwd/src/build.out 2>\$cwd/src/build.err
+cwd=\$(pwd)
+aprun -n 1 -N 1 -d 10 perl -I\$cwd \$cwd/build_driver.pl 1>\$cwd/src/build.out 2>\$cwd/src/build.err
 );
 }
 

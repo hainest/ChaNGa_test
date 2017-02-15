@@ -28,43 +28,22 @@ $args{'changa_dir'} = $args{'prefix'} . '/changa' unless $args{'changa_dir'};
 $args{'charm_dir'} = $args{'prefix'} . '/charm' unless $args{'charm_dir'};
 $args{'build_dir'} = $args{'prefix'} . '/build' unless $args{'build_dir'};
 
-my %hex_decode = (
-	'HEX'   => '--hex',
-	'NOHEX' => '--no-hex'
-);
-my %prec_decode = (
-	'single' => '--float',
-	'double' => '--no-float'
-);
-my %smp_decode = (
-	'SMP' => '--smp',
-	'NONSMP' => '--no-smp'
-);
-my %cuda_decode = (
-	'GPU' => '--cuda',
-	'CPU' => ''
-);
-my %simd_decode = (
-	'sse2' => '--simd=sse2',
-	'avx'  => '--simd=avx',
-	'generic' => ''
-);
 
 for my $type (@ChaNGa::types) {
 for my $smp  (@ChaNGa::smp) {
-	execute(
-		"perl -I$args{'inc_dir'} $args{'prefix'}/build.pl --clean --no-changa $cuda_decode{$type} $smp_decode{$smp} " .
-		"--charm_dir=$args{'charm_dir'} --changa_dir=$args{'changa_dir'} --njobs=$args{'njobs'}"
-	);
+#	execute(
+#		"perl -I$args{'inc_dir'} $args{'prefix'}/build.pl --clean --with-charm=$args{'charm_dir'} " .
+#		" $cuda_decode{$type} $smp_decode{$smp} --njobs=$args{'njobs'}"
+#	);
 for my $hex  (@ChaNGa::hexadecapole) {
 for my $simd (@ChaNGa::simd) {
 for my $prec (@ChaNGa::precision) {
 	next if $prec eq 'single' && $simd eq 'avx';
-	execute(
-		"perl -I$args{'inc_dir'} $args{'prefix'}/build.pl --charm_dir=$args{'charm_dir'} " . 
-		"--changa_dir=$args{'changa_dir'} --clean --no-charm $cuda_decode{$type} " .
-		"$prec_decode{$prec} $hex_decode{$hex} $simd_decode{$simd} --njobs=$args{'njobs'}"
-	);
+#	execute(
+#		"perl -I$args{'inc_dir'} $args{'prefix'}/build.pl --charm_dir=$args{'charm_dir'} " . 
+#		"--changa_dir=$args{'changa_dir'} --clean --no-charm $cuda_decode{$type} " .
+#		"$prec_decode{$prec} $hex_decode{$hex} $simd_decode{$simd} --njobs=$args{'njobs'}"
+#	);
 	my $suffix = "${type}_${smp}_${hex}_${simd}_${prec}";
 	copy("$args{'changa_dir'}/ChaNGa", "$args{'build_dir'}/ChaNGa_$suffix");
 }}}}}

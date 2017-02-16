@@ -67,11 +67,11 @@ sub build_charm($) {
 }
 sub build_changa($) {
 	my $opts = shift;
-	return execute("
+	execute("
 		cd $changa_dir
 		./configure $opts
 		make -j$args{'njobs'}
-	", 'fatal');
+	");
 	my $msg = "\nChaNGa build FAILED: $opts\n";
 	die $msg if $args{'fatal-errors'};
 	print STDERR $msg;

@@ -55,11 +55,15 @@ sub clean_changa() {
 sub build_charm($) {
 	my $opts = shift;
 	my $export = ($args{'cuda-dir'} ne '') ? "export CUDA_DIR=$args{'cuda-dir'}" : '';
+	my $cmd = "./build ChaNGa $args{'charm-target'} $args{'charm-options'} $opts --with-production --enable-lbuserdata -j$args{'njobs'}";
 	execute("
 		cd $charm_dir
 		$export
-		./build ChaNGa $args{'charm-target'} $args{'charm-options'} $opts --with-production --enable-lbuserdata -j$args{'njobs'}
-	", 'fatal'=>$args{'fatal-errors'});
+		$cmd
+	");
+	my $msg = "\ncharm build FAILED: $cmd\n";
+	die $msg if $args{'fatal-errors'};
+	print STDERR $msg;
 }
 sub build_changa($) {
 	my $opts = shift;
@@ -67,25 +71,36 @@ sub build_changa($) {
 		cd $changa_dir
 		./configure $opts
 		make -j$args{'njobs'}
-	", 'fatal'=>$args{'fatal-errors'});
+	", 'fatal');
+	my $msg = "\nChaNGa build FAILED: $opts\n";
+	die $msg if $args{'fatal-errors'};
+	print STDERR $msg;
 }
 
-if ($args{'basic'}) {}
-elsif ($args{'force-test'}) {}
-elsif ($args{'release'}) {}
+my %charm_decode = (
+	'cpu' => '',
+	'gpu' => 'cuda',
+	'smp' => 'smp',
+	'nosmp' => ''
+);
+my %changa_decode = (
+	'cpu' => '',
+	'gpu' => '--with-cuda'
+);
 
-for my $type (@ChaNGa::types) {
-for my $smp  (@ChaNGa::smp) {
-	build_charm("$type $smp");
-for my $hex  (@ChaNGa::hexadecapole) {
-for my $simd (@ChaNGa::simd) {
-for my $prec (@ChaNGa::precision) {
-	next if $prec eq 'single' && $simd eq 'avx';
-	build_charm("$type $smp");
-	my $suffix = "${type}_${smp}_${hex}_${simd}_${prec}";
-	copy("$changa_dir/ChaNGa", "$args{'build-dir'}/ChaNGa_$suffix");
-}}}}}
-
+if ($args{'basic'}) {
+	for my $type (@ChaNGa::types) {
+	for my $smp  (@ChaNGa::smp) {
+		build_charm("$type $smp");
+	for my $o (get_basic_options()) {
+		build_changa('');
+	}}}
+} elsif ($args{'force-test'}) {
+#	copy("$changa_dir/ChaNGa", "$args{'build-dir'}/ChaNGa_$suffix");
+#	my $suffix = "${type}_${smp}_${hex}_${simd}_${prec}";	
+} elsif ($args{'release'}) {
+	
+}
 
 __END__
  

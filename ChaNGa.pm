@@ -1,6 +1,5 @@
 package Configure::Option;
 BEGIN { $INC{"Configure/Option.pm"} = $0; }
-use List::MoreUtils qw(zip);
 
 sub new {
 	my ($class, $name, $action, @args) = @_;

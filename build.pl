@@ -64,8 +64,9 @@ sub build_charm($) {
 		$cmd
 	");
 	if (!$res) {
-		die "\ncharm build FAILED: $cmd\n" if $args{'fatal-errors'};
-		print STDERR "\ncharm build FAILED: $cmd\n";
+		my $msg = "\ncharm build FAILED: $cmd\n";
+		die $msg if $args{'fatal-errors'};
+		print STDERR $msg;
 	}
 }
 sub build_changa($) {
@@ -76,8 +77,9 @@ sub build_changa($) {
 		make -j$args{'njobs'}
 	");
 	if (!$res) {
-		die "\nChaNGa build FAILED: $opts\n" if $args{'fatal-errors'};
-		print STDERR "\nChaNGa build FAILED: $opts\n";
+		my $msg = "\nChaNGa build FAILED: $opts\n";
+		die $msg if $args{'fatal-errors'};
+		print STDERR $msg;
 	}
 }
 
@@ -94,8 +96,9 @@ if ($args{'basic'}) {
 		build_changa("$cuda $hex $cs $bg");
 	}}}}
 } elsif ($args{'force-test'}) {
+#	copy("$changa_dir/ChaNGa", "$args{'build-dir'}/ChaNGa_$suffix");
+#	my $suffix = "${type}_${smp}_${hex}_${simd}_${prec}";
 } elsif ($args{'release'}) {}
-
 
 __END__
  

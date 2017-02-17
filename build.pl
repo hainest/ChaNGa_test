@@ -1,7 +1,9 @@
 use strict;
 use warnings;
 use Getopt::Long qw(GetOptions);
-use ChaNGa qw(execute);
+use ChaNGa;
+use ChaNGa::Util qw(execute);
+use ChaNGa::Build qw(%charm_decode);
 use Cwd qw(cwd);
 use Pod::Usage;
 
@@ -55,36 +57,44 @@ sub clean_changa() {
 sub build_charm($) {
 	my $opts = shift;
 	my $export = ($args{'cuda-dir'} ne '') ? "export CUDA_DIR=$args{'cuda-dir'}" : '';
-	execute("
+	my $cmd = "./build ChaNGa $args{'charm-target'} $args{'charm-options'} $opts --with-production --enable-lbuserdata -j$args{'njobs'}";
+	my $res = execute("
 		cd $charm_dir
 		$export
-		./build ChaNGa $args{'charm-target'} $args{'charm-options'} $opts --with-production --enable-lbuserdata -j$args{'njobs'}
-	", 'fatal'=>$args{'fatal-errors'});
+		$cmd
+	");
+	if (!$res) {
+		die "\ncharm build FAILED: $cmd\n" if $args{'fatal-errors'};
+		print STDERR "\ncharm build FAILED: $cmd\n";
+	}
 }
 sub build_changa($) {
 	my $opts = shift;
-	return execute("
+	my $res = execute("
 		cd $changa_dir
 		./configure $opts
 		make -j$args{'njobs'}
-	", 'fatal'=>$args{'fatal-errors'});
+	");
+	if (!$res) {
+		die "\nChaNGa build FAILED: $opts\n" if $args{'fatal-errors'};
+		print STDERR "\nChaNGa build FAILED: $opts\n";
+	}
 }
 
-if ($args{'basic'}) {}
-elsif ($args{'force-test'}) {}
-elsif ($args{'release'}) {}
-
-for my $type (@ChaNGa::types) {
-for my $smp  (@ChaNGa::smp) {
-	build_charm("$type $smp");
-for my $hex  (@ChaNGa::hexadecapole) {
-for my $simd (@ChaNGa::simd) {
-for my $prec (@ChaNGa::precision) {
-	next if $prec eq 'single' && $simd eq 'avx';
-	build_charm("$type $smp");
-	my $suffix = "${type}_${smp}_${hex}_${simd}_${prec}";
-	copy("$changa_dir/ChaNGa", "$args{'build-dir'}/ChaNGa_$suffix");
-}}}}}
+#basic: arch, hex, changesoft, bigkeys
+#force-test: arch, hex, changesoft, smp, prec, simd
+#release: $force-test, bigkeys, wendland, cooling
+if ($args{'basic'}) {
+	for my $arch ($Charm::Build::architecture->iteritems) {
+		build_charm("$arch->[1]");
+	for my $hex ($ChaNGa::Build::hexadecapole->values) {
+	for my $cs ($ChaNGa::Build::changesoft->values) {
+	for my $bg ($ChaNGa::Build::bigkeys->values) {
+		my $cuda = $charm_decode{$arch->[0]};
+		build_changa("$cuda $hex $cs $bg");
+	}}}}
+} elsif ($args{'force-test'}) {
+} elsif ($args{'release'}) {}
 
 
 __END__

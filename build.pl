@@ -88,11 +88,11 @@ sub build_changa($) {
 #release: $force-test, bigkeys, wendland, cooling
 if ($args{'basic'}) {
 	for my $arch ($Charm::Build::architecture->iteritems) {
-		build_charm("$arch->[1]");
+		build_charm("$arch->{'value'}");
 	for my $hex ($ChaNGa::Build::hexadecapole->values) {
 	for my $cs ($ChaNGa::Build::changesoft->values) {
 	for my $bg ($ChaNGa::Build::bigkeys->values) {
-		my $cuda = $charm_decode{$arch->[0]};
+		my $cuda = $charm_decode{$arch->{'name'}};
 		build_changa("$cuda $hex $cs $bg");
 	}}}}
 } elsif ($args{'force-test'}) {

@@ -1,18 +1,22 @@
 use strict;
 use warnings;
 use Getopt::Long qw(GetOptions);
+use File::Path qw(make_path);
 use ChaNGa;
 use ChaNGa::Util qw(execute);
-use ChaNGa::Build qw(%charm_decode);
+use ChaNGa::Build qw(get_cuda_options);
 use Cwd qw(cwd);
 use Pod::Usage;
 
+# TODO: allow builds w/o CUDA
 my %args = (
 	'prefix' 		=> cwd(),
+	'charm-dir'		=> '',
+	'changa-dir'	=> '',
+	'log-file'      => 'build.log',
 	'build-dir'		=> undef,
 	'charm-target' 	=> 'net-linux-x86_64',
 	'charm-options' => '',
-	'cuda'			=> 1,
 	'cuda-dir'		=> '',
 	'force-test'	=> 0,
 	'release'		=> 0,
@@ -22,16 +26,16 @@ my %args = (
 	'help' 			=> 0
 );
 GetOptions(\%args,
-	'prefix=s', 'build-dir=s', 'charm-target=s',
-	'charm-options=s', 'cuda!', 'cuda-dir=s',
-	'force-test', 'release', 'basic', 'njobs=i',
+	'prefix=s', 'charm-dir=s', 'changa-dir=s', 'log-file=s',
+	'build-dir=s', 'charm-target=s', 'charm-options=s',
+	'cuda-dir=s', 'force-test', 'release', 'basic', 'njobs=i',
 	'fatal-errors!', 'help'
 ) or pod2usage(2);
 
 pod2usage( -exitval => 0, -verbose => 1 ) if $args{'help'};
 
-my $changa_dir = "$args{'prefix'}/changa";
-my $charm_dir = "$args{'prefix'}/charm";
+$args{'changa-dir'} = "$args{'prefix'}/changa" unless $args{'changa-dir'};
+$args{'charm-dir'} = "$args{'prefix'}/charm" unless $args{'charm-dir'};
 $args{'build-dir'} = "$args{'prefix'}/build" unless $args{'build-dir'};
 
 if (($args{'basic'} + $args{'force-test'} + $args{'release'}) > 1) {
@@ -40,65 +44,94 @@ if (($args{'basic'} + $args{'force-test'} + $args{'release'}) > 1) {
 }
 $args{'basic'} = int(!($args{'force-test'} || $args{'release'}));
 
-sub clean_charm() {
-	execute("
-		cd $charm_dir
-		rm -rf bin include lib lib_so tmp VERSION $args{'charm-target'}*
-	");
+# Override the default CUDA flag
+if ($args{'cuda-dir'} ne '') {
+	$ChaNGa::Build::cuda = Configure::Option::With->new('cuda', ($args{'cuda-dir'}, 'no'));
 }
-sub clean_changa() {
-	if( -e "$changa_dir/Makefile") {
-		execute("
-			cd $changa_dir
-			make dist-clean
-		");
-	}
-}
+
+open my $fdLog, '>', $args{'log-file'} or die "Unable to open $args{'log-file'}: $!\n";
+
 sub build_charm($) {
 	my $opts = shift;
 	my $export = ($args{'cuda-dir'} ne '') ? "export CUDA_DIR=$args{'cuda-dir'}" : '';
 	my $cmd = "./build ChaNGa $args{'charm-target'} $args{'charm-options'} $opts --with-production --enable-lbuserdata -j$args{'njobs'}";
+	print $fdLog "Building charm++ using $cmd\n";
+	execute("
+		cd $args{'charm-dir'}
+		rm -rf bin include lib lib_so tmp VERSION $args{'charm-target'}*
+	");
 	my $res = execute("
-		cd $charm_dir
+		cd $args{'charm-dir'}
 		$export
 		$cmd
 	");
 	if (!$res) {
 		my $msg = "\ncharm build FAILED: $cmd\n";
 		die $msg if $args{'fatal-errors'};
-		print STDERR $msg;
+		print $fdLog $msg;
 	}
 }
 sub build_changa($) {
 	my $opts = shift;
+	print $fdLog "Building ChaNGa using $opts\n";
+	if( -e "$args{'changa-dir'}/Makefile") {
+		execute("
+			cd $args{'changa-dir'}
+			make dist-clean
+		");
+	}
 	my $res = execute("
-		cd $changa_dir
+		cd $args{'changa-dir'}
+		export CHARM_DIR=\"$args{'charm-dir'}\"
 		./configure $opts
 		make -j$args{'njobs'}
 	");
 	if (!$res) {
 		my $msg = "\nChaNGa build FAILED: $opts\n";
 		die $msg if $args{'fatal-errors'};
-		print STDERR $msg;
+		print $fdLog $msg;
 	}
 }
 
-#basic: arch, hex, changesoft, bigkeys
-#force-test: arch, hex, changesoft, smp, prec, simd
-#release: $force-test, bigkeys, wendland, cooling
 if ($args{'basic'}) {
-	for my $arch ($Charm::Build::architecture->iteritems) {
-		build_charm("$arch->{'value'}");
-	for my $hex ($ChaNGa::Build::hexadecapole->values) {
-	for my $cs ($ChaNGa::Build::changesoft->values) {
-	for my $bg ($ChaNGa::Build::bigkeys->values) {
-		my $cuda = $charm_decode{$arch->{'name'}};
-		build_changa("$cuda $hex $cs $bg");
+	for my $cuda (get_cuda_options()) {
+		build_charm($cuda->{'charm'}->value);
+	for my $hex (@$ChaNGa::Build::hexadecapole) {
+	for my $cs (@$ChaNGa::Build::changesoft) {
+	for my $bg (@$ChaNGa::Build::bigkeys) {
+		my $opts = join(' ', map {$_->value} ($cuda->{'changa'}, $hex, $cs, $bg));
+		build_changa($opts);
 	}}}}
 } elsif ($args{'force-test'}) {
-#	copy("$changa_dir/ChaNGa", "$args{'build-dir'}/ChaNGa_$suffix");
-#	my $suffix = "${type}_${smp}_${hex}_${simd}_${prec}";
-} elsif ($args{'release'}) {}
+	make_path($args{'build-dir'}) if ! -d $args{'build-dir'};
+	
+	for my $cuda (get_cuda_options()) {
+	for my $smp (@$Charm::Build::smp) {
+		build_charm(join(' ', $cuda->{'charm'}->value, $smp->value));
+	for my $hex (@$ChaNGa::Build::hexadecapole) {
+	for my $cs (@$ChaNGa::Build::changesoft) {
+	for my $float (@$ChaNGa::Build::float) {
+	for my $simd (@$ChaNGa::Build::simd) {
+		my $opts = join(' ', map {$_->value} ($cuda->{'changa'}, $hex, $cs, $float, $simd));
+		build_changa($opts);
+		my $suffix = join('_', map {$_->key} (($cuda->{'changa'}, $smp, $hex, $cs, $float, $simd)));
+		copy("$args{'changa-dir'}/ChaNGa", "$args{'build-dir'}/ChaNGa_$suffix");
+	}}}}}}
+} elsif ($args{'release'}) {
+	for my $cuda (get_cuda_options()) {
+	for my $smp (@$Charm::Build::smp) {
+		build_charm(join(' ', $cuda->{'charm'}->value, $smp->value));
+	for my $hex (@$ChaNGa::Build::hexadecapole) {
+	for my $cs (@$ChaNGa::Build::changesoft) {
+	for my $float (@$ChaNGa::Build::float) {
+	for my $simd (@$ChaNGa::Build::simd) {
+	for my $bk (@$ChaNGa::Build::bigkeys) {
+	for my $wend (@$ChaNGa::Build::wendland) {
+	for my $cool (@$ChaNGa::Build::cooling) {
+		my $opts = join(' ', map {$_->value} ($cuda->{'changa'}, $hex, $cs, $float, $simd, $bk, $wend, $cool));
+		build_changa($opts);
+	}}}}}}}}}
+}
 
 __END__
  
@@ -112,10 +145,11 @@ build [options]
  
  Options:
    --prefix             Base directory for the source and build directories (default: pwd)
+   --charm-dir=PATH     Charm directory (default: prefix/charm)
+   --changa-dir=PATH    ChaNGa directory (default: prefix/changa)
    --build-dir          Directory where outputs are stored (default: prefix/build)
    --charm-target=T     Build charm++ for target T (default: net-linux-x86_64)
    --charm-options=S    Pass options S to charm build (wrap S in quotes to pass many values)
-   --[no-]cuda          Enable CUDA (default: yes)
    --cuda-dir           Override CUDA toolkit directory
    --force-test         Build executables for performing force accuracy tests (default: no)
    --release            Run complete set of build tests for ChaNGa release (default: no)

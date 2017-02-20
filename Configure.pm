@@ -9,33 +9,28 @@ sub new {
 		'args' => \@args
 	}, $class;
 }
-sub values {
+sub get_switches {
 	my ($name, $action) = @{$_[0]}{'name','action'};
-	my @vals = ();
-	for my $arg (@{$_[0]->{'args'}}) {
-		push @vals, "--$action-$name=$arg";
-	}
-	return @vals;
+	map {"--$action-$name=$_"} @{$_[0]->{'args'}};
 }
 sub names {
 	my $name = $_[0]->{'name'};
-	my @vals = ();
-	for my $arg (@{$_[0]->{'args'}}) {
-		push @vals, "$name-$arg";
-	}
-	return @vals;
+	map { 
+		if ($_ eq 'no') { "no$name"; }
+		elsif ($_ eq 'yes') { $name; }
+		else { "$name-$_"; }
+	} @{$_[0]->{'args'}};
 }
-sub iteritems {
+sub items {
+	use List::MoreUtils qw(zip);
+	use List::Util qw(pairs);
 	my @names = $_[0]->names;
-	my @vals = $_[0]->values;
-	my @items = ();
-	for my $i (0..@names-1) {
-		push @items, {'name' => $names[$i], 'value' => $vals[$i]};
-	}
-	return @items;
+	my @vals = $_[0]->get_switches;
+	pairs zip @names, @vals;
 }
+use overload '@{}' => sub {[&items]};
 
-#-----------------------------------------------#
+#---------------------------------------------------------------#
 package Configure::Option::Enable;
 use parent qw(Configure::Option);
 sub new {
@@ -43,21 +38,23 @@ sub new {
 	$class->SUPER::new($name, 'enable', @args ? @args : ('yes','no'));
 }
 
-#-----------------------------------------------#
+#---------------------------------------------------------------#
 package Configure::Option::With;
 use parent qw(Configure::Option);
 sub new {
-	my ($class, $name, @args) = @_;
-	$class->SUPER::new($name, 'with', @args ? @args : ('yes','no'));
+	my ($class, $name) = @_;
+	$class->SUPER::new($name, 'with', ('yes','no'));
 }
 
-#-----------------------------------------------#
+#---------------------------------------------------------------#
 package Configure::Option::Positional;
 use parent qw(Configure::Option);
 sub new {
 	my ($class, $name) = @_;
-	$class->SUPER::new($name, undef, ('yes','no'));
+	$class->SUPER::new($name);
 }
-sub values { ($_[0]->{'name'}, ''); }
+sub get_switches { ($_[0]->{'name'}, ''); }
+sub names { ("$_[0]->{'name'}", "no$_[0]->{'name'}"); }
 
 1;
+

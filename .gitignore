@@ -12,3 +12,4 @@ __pycache__/
 stuff.pl
 src/
 results/
+*.log

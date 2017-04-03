@@ -2,9 +2,11 @@ use strict;
 use warnings;
 use Getopt::Long qw(GetOptions);
 use File::Path qw(make_path);
+use File::Copy qw(copy move);
+use Configure;
 use ChaNGa;
 use ChaNGa::Util qw(execute);
-use ChaNGa::Build qw(get_cuda_options);
+use ChaNGa::Build qw(:all);
 use Cwd qw(cwd);
 use Pod::Usage;
 
@@ -96,41 +98,30 @@ sub build_changa($) {
 if ($args{'basic'}) {
 	for my $cuda (get_cuda_options()) {
 		build_charm($cuda->{'charm'}->value);
-	for my $hex (@$ChaNGa::Build::hexadecapole) {
-	for my $cs (@$ChaNGa::Build::changesoft) {
-	for my $bg (@$ChaNGa::Build::bigkeys) {
-		my $opts = join(' ', map {$_->value} ($cuda->{'changa'}, $hex, $cs, $bg));
+	for my $o (@{get_basic_options()}) {
+		my $opts = join(' ', map {$_->value} ($cuda->{'changa'}, @$o));
 		build_changa($opts);
-	}}}}
+	}}
 } elsif ($args{'force-test'}) {
 	make_path($args{'build-dir'}) if ! -d $args{'build-dir'};
 	
 	for my $cuda (get_cuda_options()) {
 	for my $smp (@$Charm::Build::smp) {
 		build_charm(join(' ', $cuda->{'charm'}->value, $smp->value));
-	for my $hex (@$ChaNGa::Build::hexadecapole) {
-	for my $cs (@$ChaNGa::Build::changesoft) {
-	for my $float (@$ChaNGa::Build::float) {
-	for my $simd (@$ChaNGa::Build::simd) {
-		my $opts = join(' ', map {$_->value} ($cuda->{'changa'}, $hex, $cs, $float, $simd));
+	for my $o (@{get_forcetest_options()}) {
+		my $opts = join(' ', map {$_->value} ($cuda->{'changa'}, @$o));
 		build_changa($opts);
-		my $suffix = join('_', map {$_->key} (($cuda->{'changa'}, $smp, $hex, $cs, $float, $simd)));
-		copy("$args{'changa-dir'}/ChaNGa", "$args{'build-dir'}/ChaNGa_$suffix");
-	}}}}}}
+		my $suffix = join('_', map {$_->key} (($cuda->{'changa'}, $smp, @$o)));
+		copy("$args{'changa-dir'}/ChaNGa", "$args{'build-dir'}/ChaNGa_$suffix") or die "Copy failed: $!";
+	}}}
 } elsif ($args{'release'}) {
 	for my $cuda (get_cuda_options()) {
 	for my $smp (@$Charm::Build::smp) {
 		build_charm(join(' ', $cuda->{'charm'}->value, $smp->value));
-	for my $hex (@$ChaNGa::Build::hexadecapole) {
-	for my $cs (@$ChaNGa::Build::changesoft) {
-	for my $float (@$ChaNGa::Build::float) {
-	for my $simd (@$ChaNGa::Build::simd) {
-	for my $bk (@$ChaNGa::Build::bigkeys) {
-	for my $wend (@$ChaNGa::Build::wendland) {
-	for my $cool (@$ChaNGa::Build::cooling) {
-		my $opts = join(' ', map {$_->value} ($cuda->{'changa'}, $hex, $cs, $float, $simd, $bk, $wend, $cool));
+	for my $o(@{get_release_options()}) {
+		my $opts = join(' ', map {$_->value} ($cuda->{'changa'}, @$o));
 		build_changa($opts);
-	}}}}}}}}}
+	}}}
 }
 
 __END__

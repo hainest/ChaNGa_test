@@ -32,7 +32,10 @@ package ChaNGa::Build;
 BEGIN { $INC{"ChaNGa/Build.pm"} = $0; }
 
 use base 'Exporter';
-our @EXPORT_OK = qw(%launch_config get_cuda_options);
+our @EXPORT_OK = qw(%launch_config get_cuda_options
+					get_basic_options get_forcetest_options
+					get_release_options);
+our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 our $cuda 		  = Configure::Option::With->new('cuda');
 our $hexadecapole = Configure::Option::Enable->new('hexadecapole');
@@ -51,6 +54,39 @@ sub get_cuda_options {
 		push @opts, {'charm' => $charm[$i], 'changa' => $changa[$i]};
 	}
 	return @opts;
+}
+sub get_basic_options {
+	my @opts = ();
+	for my $hex (@$ChaNGa::Build::hexadecapole) {
+	for my $cs (@$ChaNGa::Build::changesoft) {
+	for my $bg (@$ChaNGa::Build::bigkeys) {
+		push @opts, [$hex, $cs, $bg];
+	}}}
+	return \@opts;
+}
+sub get_forcetest_options {
+	my @opts = ();
+	for my $hex (@$ChaNGa::Build::hexadecapole) {
+	for my $cs (@$ChaNGa::Build::changesoft) {
+	for my $float (@$ChaNGa::Build::float) {
+	for my $simd (@$ChaNGa::Build::simd) {
+		push @opts, [$hex, $cs, $float, $simd];
+	}}}}
+	return \@opts;
+}
+sub get_release_options {
+	my @opts = ();
+	
+	for my $hex (@$ChaNGa::Build::hexadecapole) {
+	for my $cs (@$ChaNGa::Build::changesoft) {
+	for my $float (@$ChaNGa::Build::float) {
+	for my $simd (@$ChaNGa::Build::simd) {
+	for my $bk (@$ChaNGa::Build::bigkeys) {
+	for my $wend (@$ChaNGa::Build::wendland) {
+	for my $cool (@$ChaNGa::Build::cooling) {
+		push @opts, [$hex, $cs, $float, $simd, $bk, $wend, $cool];
+	}}}}}}}
+	return \@opts;
 }
 
 our %launch_config = (
@@ -81,5 +117,4 @@ our %launch_config = (
 );
 
 1;
-
 

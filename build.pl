@@ -41,10 +41,12 @@ $args{'charm-dir'} //= "$args{'prefix'}/charm";
 $args{'build-dir'} //= "$args{'prefix'}/build";
 $args{'log-file'} //= "$args{'prefix'}/build.log";
 
+# Only allow one test type to be specified
 if (($args{'basic'} + $args{'force-test'} + $args{'release'}) > 1) {
-	print "Too many build types specified\n";
-	pod2usage(-exitval => 0, -verbose=>1);
+	pod2usage("$0: Too many build types specified\n");
 }
+
+# By default, use the 'basic' test type
 $args{'basic'} = int(!($args{'force-test'} || $args{'release'}));
 
 # Override the default CUDA flag
@@ -58,7 +60,7 @@ sub build_charm($) {
 	my $opts = shift;
 	my $export = ($args{'cuda-dir'} ne '') ? "export CUDA_DIR=$args{'cuda-dir'}" : '';
 	my $cmd = "./build ChaNGa $args{'charm-target'} $args{'charm-options'} $opts --with-production --enable-lbuserdata -j$args{'njobs'}";
-	print $fdLog "Building charm++ using $cmd\n";
+	print $fdLog "Building charm++ using '$cmd'... ";
 	execute("
 		cd $args{'charm-dir'}
 		rm -rf bin include lib lib_so tmp VERSION $args{'charm-target'}*
@@ -69,9 +71,8 @@ sub build_charm($) {
 		$cmd
 	");
 	if (!$res) {
-		my $msg = "\ncharm build FAILED: $cmd\n";
-		die $msg if $args{'fatal-errors'};
-		print $fdLog $msg;
+		die "charm build FAILED using '$cmd'\n" if $args{'fatal-errors'};
+		print $fdLog "FAILED\n";
 	}
 }
 sub build_changa($) {
@@ -90,9 +91,8 @@ sub build_changa($) {
 		make -j$args{'njobs'}
 	");
 	if (!$res) {
-		my $msg = "\nChaNGa build FAILED: $opts\n";
-		die $msg if $args{'fatal-errors'};
-		print $fdLog $msg;
+		die "ChaNGa build FAILED using '$opts'\n" if $args{'fatal-errors'};
+		print $fdLog "FAILED\n";
 	}
 }
 

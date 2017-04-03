@@ -54,6 +54,8 @@ if ($args{'cuda-dir'}) {
 	$ChaNGa::Build::cuda = Configure::Option::With->new('cuda', ($args{'cuda-dir'}, 'no'));
 }
 
+# Save a backup if the log file already exists
+move($args{'log-file'}, "$args{'log-file'}.bak") if -e $args{'log-file'};
 open my $fdLog, '>', $args{'log-file'} or die "Unable to open $args{'log-file'}: $!\n";
 
 sub build_charm($) {

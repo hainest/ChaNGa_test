@@ -6,14 +6,10 @@ BEGIN { $INC{"ChaNGa/Util.pm"} = $0; }
 use base 'Exporter';
 our @EXPORT_OK = qw(execute);
 
-sub execute($;%) {
+sub execute($) {
 	my $cmd = shift;
-	print "$cmd\n";
-#	my %opts = @_;
-#	system($cmd);
-#	my $failed = ( $? >> 8 ) != 0 || $? == -1 || ( $? & 127 ) != 0;
-#	die $cmd if ($failed && $opts{'fatal'});
-#	return !$failed;
+	system($cmd);
+	return !(( $? >> 8 ) != 0 || $? == -1 || ( $? & 127 ) != 0);
 }
 
 #-----------------------------------------------#

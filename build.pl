@@ -35,7 +35,7 @@ GetOptions(\%args,
 	'fatal-errors!', 'help'
 ) or pod2usage(2);
 
-pod2usage( -exitval => 0, -verbose => 1 ) if $args{'help'};
+pod2usage( -exitval => 0, -verbose => 99 ) if $args{'help'};
 
 $args{'changa-dir'} //= "$args{'prefix'}/changa";
 $args{'charm-dir'} //= "$args{'prefix'}/charm";
@@ -175,10 +175,10 @@ for my $type (keys %build_times) {
 
 
 __END__
- 
-=head1 NAME
- 
-charm++ and ChaNGa builder
+
+=head1 DESCRIPTION
+
+A tool for automating building Charm++ and ChaNGa
  
 =head1 SYNOPSIS
  
@@ -201,4 +201,3 @@ build [options]
    --help               Print this help message
 
 =cut
-

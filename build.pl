@@ -13,13 +13,13 @@ use Pod::Usage;
 # TODO: allow builds w/o CUDA
 my %args = (
 	'prefix' 		=> cwd(),
-	'charm-dir'		=> '',
-	'changa-dir'	=> '',
-	'log-file'      => 'build.log',
+	'charm-dir'		=> undef,
+	'changa-dir'	=> undef,
+	'log-file'      => undef,
 	'build-dir'		=> undef,
 	'charm-target' 	=> 'net-linux-x86_64',
-	'charm-options' => '',
-	'cuda-dir'		=> '',
+	'charm-options' => '',	# This needs to be an empty string _NOT_ undef
+	'cuda-dir'		=> '',	# This needs to be an empty string _NOT_ undef
 	'force-test'	=> 0,
 	'release'		=> 0,
 	'basic'			=> 0,
@@ -36,9 +36,10 @@ GetOptions(\%args,
 
 pod2usage( -exitval => 0, -verbose => 1 ) if $args{'help'};
 
-$args{'changa-dir'} = "$args{'prefix'}/changa" unless $args{'changa-dir'};
-$args{'charm-dir'} = "$args{'prefix'}/charm" unless $args{'charm-dir'};
-$args{'build-dir'} = "$args{'prefix'}/build" unless $args{'build-dir'};
+$args{'changa-dir'} //= "$args{'prefix'}/changa";
+$args{'charm-dir'} //= "$args{'prefix'}/charm";
+$args{'build-dir'} //= "$args{'prefix'}/build";
+$args{'log-file'} //= "$args{'prefix'}/build.log";
 
 if (($args{'basic'} + $args{'force-test'} + $args{'release'}) > 1) {
 	print "Too many build types specified\n";
@@ -47,7 +48,7 @@ if (($args{'basic'} + $args{'force-test'} + $args{'release'}) > 1) {
 $args{'basic'} = int(!($args{'force-test'} || $args{'release'}));
 
 # Override the default CUDA flag
-if ($args{'cuda-dir'} ne '') {
+if ($args{'cuda-dir'}) {
 	$ChaNGa::Build::cuda = Configure::Option::With->new('cuda', ($args{'cuda-dir'}, 'no'));
 }
 

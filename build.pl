@@ -9,6 +9,7 @@ use ChaNGa::Util qw(execute);
 use ChaNGa::Build qw(:all);
 use Cwd qw(cwd);
 use Pod::Usage;
+use Benchmark qw(timediff :hireswallclock);
 
 # TODO: allow builds w/o CUDA
 my %args = (
@@ -58,6 +59,11 @@ if ($args{'cuda-dir'}) {
 move($args{'log-file'}, "$args{'log-file'}.bak") if -e $args{'log-file'};
 open my $fdLog, '>', $args{'log-file'} or die "Unable to open $args{'log-file'}: $!\n";
 
+my %build_times = (
+	'charm' => [],
+	'changa' => []
+);
+
 sub build_charm($) {
 	my $opts = shift;
 	my $export = ($args{'cuda-dir'} ne '') ? "export CUDA_DIR=$args{'cuda-dir'}" : '';
@@ -67,6 +73,7 @@ sub build_charm($) {
 		cd $args{'charm-dir'}
 		rm -rf bin include lib lib_so tmp VERSION $args{'charm-target'}*
 	");
+	my $begin = Benchmark->new();
 	my $res = execute("
 		cd $args{'charm-dir'}
 		$export
@@ -75,6 +82,9 @@ sub build_charm($) {
 	if (!$res) {
 		die "charm build FAILED using '$cmd'\n" if $args{'fatal-errors'};
 		print $fdLog "FAILED\n";
+	} else {
+		push @{$build_times{'charm'}}, timediff(Benchmark->new(), $begin)->real;
+		print $fdLog "OK\n";
 	}
 }
 sub build_changa($) {
@@ -86,6 +96,7 @@ sub build_changa($) {
 			make dist-clean
 		");
 	}
+	my $begin = Benchmark->new();
 	my $res = execute("
 		cd $args{'changa-dir'}
 		export CHARM_DIR=\"$args{'charm-dir'}\"
@@ -95,6 +106,9 @@ sub build_changa($) {
 	if (!$res) {
 		die "ChaNGa build FAILED using '$opts'\n" if $args{'fatal-errors'};
 		print $fdLog "FAILED\n";
+	} else {
+		push @{$build_times{'changa'}}, timediff(Benchmark->new(), $begin)->real;
+		print $fdLog "OK\n";
 	}
 }
 
@@ -126,6 +140,37 @@ if ($args{'basic'}) {
 		build_changa($opts);
 	}}}
 }
+
+sub mean {
+	use List::Util qw(sum);
+	return 0.0 if @{$_[0]} <= 0;
+	sum(@{$_[0]}) / @{$_[0]};
+}
+sub stddev {
+	use List::Util qw(sum);
+	my ($mean, $data) = @_;
+	return 0.0 if @$data <= 1; 
+	sqrt(sum(map {($_-$mean)**2.0} @$data) / (@$data - 1));
+}
+
+# Display build statistics
+print $fdLog "\n\n", '*'x10, " Build statistics ", '*'x10, "\n";
+for my $type (keys %build_times) {
+	print $fdLog "Built ", scalar @{$build_times{$type}}, " versions of $type.\n";
+	my $avg = mean($build_times{$type});
+	my $std = stddev($avg, $build_times{$type});
+	printf($fdLog "    time: %.3f +- %.3f seconds\n", $avg, $std);
+}
+
+{
+	my $build_file = 'build.timings';
+	move($build_file, "$build_file.bak") if -e $build_file;
+	open my $fdOut, '>', $build_file or die;
+	for my $type (keys %build_times) {
+		print $fdOut "$type: ", join(',', @{$build_times{$type}}), "\n";
+	}
+}
+
 
 __END__
  

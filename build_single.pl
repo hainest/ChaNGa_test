@@ -108,7 +108,7 @@ build [options]
  Options:
    --prefix             Base directory for the source and build directories (default: pwd)
    --with-charm[=dir]   Build charm++ from source in dir (default dir: prefix/charm)
-   --charm-target=T     Build charm++ for target T (default: net-linux-x86_64)
+   --charm-target=T     Build charm++ for target T (default: netlrts-linux-x86_64)
    --charm-options=S    Pass options S to charm build (wrap S in quotes to pass many values)
    --with-changa[=dir]  Build ChaNGa from source in dir (default dir: prefix/changa)
    --with-cuda[=dir]    Enable CUDA and use library in dir (default: /usr/lib/cuda)

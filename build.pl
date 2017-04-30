@@ -18,7 +18,7 @@ my %args = (
 	'changa-dir'	=> undef,
 	'log-file'      => undef,
 	'build-dir'		=> undef,
-	'charm-target' 	=> 'net-linux-x86_64',
+	'charm-target' 	=> 'netlrts-linux-x86_64',
 	'charm-options' => '',	# This needs to be an empty string _NOT_ undef
 	'cuda-dir'		=> '',	# This needs to be an empty string _NOT_ undef
 	'force-test'	=> 0,
@@ -190,7 +190,7 @@ build [options]
    --changa-dir=PATH    ChaNGa directory (default: prefix/changa)
    --log-file=FILE      Store logging data in FILE (default: prefix/build.log)
    --build-dir          Directory where outputs are stored (default: prefix/build)
-   --charm-target=T     Build charm++ for target T (default: net-linux-x86_64)
+   --charm-target=T     Build charm++ for target T (default: netlrts-linux-x86_64)
    --charm-options=S    Pass options S to charm build (wrap S in quotes to pass many values)
    --cuda-dir           Override CUDA toolkit directory
    --force-test         Build executables for performing force accuracy tests (default: no)

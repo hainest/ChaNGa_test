@@ -8,11 +8,12 @@ use Getopt::Long qw(GetOptions);
 
 my %options = (
 	'base_dir' => cwd(),
+	'eta'      	=> 0.15491,
 	'acc'  => 1,
 	'help' => 0
 );
 GetOptions(\%options,
-	'base_dir=s', 'acc!', 'help'
+	'base_dir=s', 'eta=f', 'acc!', 'help'
 ) or pod2usage(1);
 
 pod2usage( -exitval => 0, -verbose => 1 ) if $options{'help'};
@@ -50,7 +51,7 @@ dTheta          = $t
 iOutInterval    = $nSteps
 achOutName      = $outfile
 iLogInterval    = 1
-dEta            = 0.15491
+dEta            = $options{'eta'}
 achInFile       = $infile
 bDoDensity      = 0
 bPrefetch       = 1
@@ -73,6 +74,7 @@ makeParamFiles.pl input.tipsy [options]
  
  Options:
    --base_dir     Directory relative to which files will be written
+   --eta          Timestepping criterion (default: 0.15491)
    --[no-]acc     Output acceleration parameter files
    --help         Print this help message
 =cut

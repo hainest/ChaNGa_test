@@ -57,7 +57,7 @@ bDoDensity      = 0
 bPrefetch       = 1
 nBucket         = $b
 iVerbosity      = 1
-bPrintBinary    = 1
+iBinaryOutput   = 1  % save outputs in SP float
 EOF
 ;
 }

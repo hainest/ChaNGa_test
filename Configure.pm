@@ -42,8 +42,8 @@ sub new {
 package Configure::Option::With;
 use parent qw(Configure::Option);
 sub new {
-	my ($class, $name) = @_;
-	$class->SUPER::new($name, 'with', ('yes','no'));
+	my ($class, $name, @args) = @_;
+	$class->SUPER::new($name, 'with', @args ? @args : ('yes','no'));
 }
 
 #---------------------------------------------------------------#

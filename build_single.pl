@@ -35,7 +35,7 @@ my %args = (
 GetOptions(\%args,
 	'prefix=s', 'with-charm=s{0,1}', 'charm-target=s', 'charm-options=s',
 	'with-changa=s{0,1}', 'with-cuda=s{0,1}', 'clean!', 'smp!',
-	'float!', 'njobs=i', 'hex!', 'simd=s', 'help'
+	'float!', 'njobs=i', 'hex!', 'simd=s', 'bigkeys!', 'help'
 ) or pod2usage(2);
 
 pod2usage( -exitval => 0, -verbose => 1 ) if $args{'help'};
@@ -115,6 +115,7 @@ build [options]
    --njobs=N            Number of make jobs (default: N=2)
    --[no-]hex           Use hexadecapole (default: yes)
    --simd=T             Use SIMD [T is generic, sse2, or avx] (default: generic)
+   --[no-]bigkeys       Use 128-bit node keys (default: yes)
    --help               Print this help message
 =cut
 

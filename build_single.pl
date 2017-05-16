@@ -65,9 +65,9 @@ sub clean_changa() {
 		");
 	}
 }
-if ($args{'charm'}) {
+if ($args{'with-charm'}) {
 	clean_charm() if ($args{'clean'});
-	my $cuda = ($args{'cuda'}) ? 'cuda' : '';
+	my $cuda = ($args{'with-cuda'}) ? 'cuda' : '';
 	my $smp = ($args{'smp'}) ? 'smp' : '';
 	execute( "
 		cd $args{'with-charm'}
@@ -76,9 +76,9 @@ if ($args{'charm'}) {
 	" );
 }
 
-if ($args{'changa'}) {
+if ($args{'with-changa'}) {
 	clean_changa() if ($args{'clean'});
-	my $cuda = ($args{'cuda'}) ? "--with-cuda=$args{'with-cuda'}" : '';
+	my $cuda = ($args{'with-cuda'}) ? "--with-cuda=$args{'with-cuda'}" : '';
 	my $float = ($args{'float'}) ? '--enable-float' : '';
 	my $hex = ($args{'hex'}) ? '' : '--disable-hexadecapole';
 	my $simd = $simd_decode{$args{'simd'}};

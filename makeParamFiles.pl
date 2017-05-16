@@ -7,10 +7,10 @@ use ChaNGa qw(get_all_options);
 use Getopt::Long qw(GetOptions);
 
 my %options = (
-	'base_dir' => cwd(),
+	'base_dir' 	=> cwd(),
 	'eta'      	=> 0.15491,
-	'acc'  => 1,
-	'help' => 0
+	'acc'  		=> 1,
+	'help' 		=> 0
 );
 GetOptions(\%options,
 	'base_dir=s', 'eta=f', 'acc!', 'help'

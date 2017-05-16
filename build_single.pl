@@ -30,9 +30,6 @@ my %args = (
 	'hex' 			=> 1,
 	'simd' 			=> 'generic',
 	'bigkeys'		=> '',
-	'changesoft'	=> undef,
-	'wendland'		=> undef,
-	'cooling'		=> undef,
 	'help' 			=> undef
 );
 GetOptions(\%args,

@@ -49,7 +49,7 @@ if (!exists $simd_decode{$args{'simd'}}) {
 
 $args{'with-changa'} = $args{'prefix'} . '/changa' if (defined $args{'with-changa'} && $args{'with-changa'} eq '');
 $args{'with-charm'} = $args{'prefix'} . '/charm' if (defined $args{'with-charm'} && $args{'with-charm'} eq '');
-$args{'with-cuda'} = '/usr/lib/cuda' if (defined $args{'with-cuda'} && $args{'with-cuda'} eq '');
+$args{'with-cuda'} = '/usr/local/lib/cuda' if (defined $args{'with-cuda'} && $args{'with-cuda'} eq '');
 
 sub clean_charm() {
 	execute("

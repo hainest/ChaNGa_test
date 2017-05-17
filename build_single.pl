@@ -66,9 +66,10 @@ if ($args{'with-charm'}) {
 	clean_charm() if ($args{'clean'});
 	my $cuda = ($args{'with-cuda'}) ? 'cuda' : '';
 	my $smp = ($args{'smp'}) ? 'smp' : '';
+	my $cuda_dir = $args{'with-cuda'} ? "export CUDA_DIR=$args{'with-cuda'}" : '';
 	execute( "
 		cd $args{'with-charm'}
-		export CUDA_DIR=$args{'with-cuda'}
+		$cuda_dir
 		./build ChaNGa $args{'charm-target'} $args{'charm-options'} $cuda $smp --with-production --enable-lbuserdata -j$args{'njobs'}
 	" );
 }

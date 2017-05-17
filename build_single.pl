@@ -87,13 +87,8 @@ if ($args{'with-changa'}) {
 	" );
 }
 
-if($args{'clean'} && !$args{'charm'} && !$args{'changa'}) {
-	clean_charm();
-	clean_changa();
-}
-
 __END__
- 
+
 =head1 NAME
  
 charm++ and ChaNGa builder

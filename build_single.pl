@@ -18,11 +18,11 @@ my %simd_decode = (
 
 my %args = (
 	'prefix' 		=> cwd(),
-	'with-charm'	=> undef,
+	'with-charm'	=> '',
 	'charm-target' 	=> 'netlrts-linux-x86_64',
 	'charm-options' => '',
 	'with-changa'	=> '',
-	'with-cuda'		=> '',
+	'with-cuda'		=> undef,
 	'clean' 		=> 0,
 	'smp'			=> 0,
 	'float'			=> 0,

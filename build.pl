@@ -77,6 +77,10 @@ sub build_charm($) {
 	my $res = execute("
 		cd $args{'charm-dir'}
 		$export
+
+		# Fix for RCA module issues (https://charm.cs.illinois.edu/redmine/issues/534)
+		export PE_PKGCONFIG_LIBS=cray-rca:\$PE_PKGCONFIG_LIBS
+	
 		$cmd
 	");
 	if (!$res) {
@@ -134,13 +138,16 @@ if ($args{'basic'}) {
 		copy("$args{'changa-dir'}/ChaNGa", "$args{'build-dir'}/ChaNGa_$suffix") or die "Copy failed: $!";
 	}}}
 } elsif ($args{'release'}) {
-	for my $cuda (get_cuda_options()) {
+	$ChaNGa::Build::cooling = Configure::Option::Enable->new('cooling', ('no','cosmo'));
+	make_path($args{'build-dir'}) if ! -d $args{'build-dir'};
+	
 	for my $smp (@$Charm::Build::smp) {
-		build_charm(join(' ', $cuda->{'charm'}->value, $smp->value));
-	for my $o(@{get_release_options()}) {
-		my $opts = join(' ', map {$_->value} ($cuda->{'changa'}, @$o));
-		build_changa($opts);
-	}}}
+		build_charm($smp->value);
+	for my $o (@{get_release_options()}) {
+		build_changa(@$o);
+		my $suffix = join('_', map {$_->key} ($smp, @$o));
+		copy("$args{'changa-dir'}/ChaNGa", "$args{'build-dir'}/ChaNGa_$suffix") or die "Copy failed: $!";
+	}}
 }
 
 sub mean {

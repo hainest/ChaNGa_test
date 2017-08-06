@@ -76,6 +76,14 @@ sub get_forcetest_options {
 }
 sub get_release_options {
 	my @opts = ();
+	for my $cool (@$ChaNGa::Build::cooling) {
+	for my $bk (@$ChaNGa::Build::bigkeys) {
+		push @opts, [$cool, $bk];
+	}}
+	return \@opts;
+}
+sub get_release_full_options {
+	my @opts = ();
 	
 	for my $hex (@$ChaNGa::Build::hexadecapole) {
 	for my $cs (@$ChaNGa::Build::changesoft) {

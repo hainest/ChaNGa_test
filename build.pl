@@ -83,8 +83,8 @@ sub build_charm($) {
 		$cmd
 	");
 	if (!$res) {
-		die "charm build FAILED using '$cmd'\n" if $args{'fatal-errors'};
 		print $fdLog "FAILED\n";
+		exit if $args{'fatal-errors'};
 	} else {
 		push @{$build_times{'charm'}}, timediff(Benchmark->new(), $begin)->real;
 		print $fdLog "OK\n";
@@ -109,8 +109,8 @@ sub build_changa($) {
 		make -j$args{'njobs'}
 	");
 	if (!$res) {
-		die "ChaNGa build FAILED using '$opts'\n" if $args{'fatal-errors'};
 		print $fdLog "FAILED\n";
+		exit if $args{'fatal-errors'};
 	} else {
 		push @{$build_times{'changa'}}, timediff(Benchmark->new(), $begin)->real;
 		print $fdLog "OK\n";

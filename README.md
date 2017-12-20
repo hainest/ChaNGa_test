@@ -21,3 +21,9 @@ A tool for automating building Charm++ and ChaNGa
 	   --njobs=N            Number of make jobs (default: N=2)
 	   --[no-]fatal-errors  Kill build sequence on any error (default: no; errors are reported only)
 	   --help               Print this help message
+
+---
+
+Builds are very chatty. I recommend using
+
+	perl build.pl 1>/dev/null 2>build.err

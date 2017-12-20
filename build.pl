@@ -66,7 +66,6 @@ my %build_times = (
 
 sub build_charm($) {
 	my $opts = shift;
-	my $export = ($args{'cuda-dir'} ne '') ? "export CUDA_DIR=$args{'cuda-dir'}" : '';
 	my $cmd = "./build ChaNGa $args{'charm-target'} $args{'charm-options'} $opts --with-production --enable-lbuserdata -j$args{'njobs'}";
 	print $fdLog "Building charm++ using '$cmd'... ";
 	execute("
@@ -76,7 +75,7 @@ sub build_charm($) {
 	my $begin = Benchmark->new();
 	my $res = execute("
 		cd $args{'charm-dir'}
-		$export
+		export CUDA_DIR=$args{'cuda-dir'}
 
 		# Fix for RCA module issues (https://charm.cs.illinois.edu/redmine/issues/534)
 		export PE_PKGCONFIG_LIBS=cray-rca:\$PE_PKGCONFIG_LIBS

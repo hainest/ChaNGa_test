@@ -1,15 +1,3 @@
-package Configure::Option::pairs;
-BEGIN { $INC{"Configure/Option/pairs.pm"} = $0; }
-
-# For ancient perls without List::Util::pairs
-sub new {
-	my ($class, $k, $v) = @_;
-	bless [$k, $v], $class;
-}
-sub key   { $_[0]->[0]; }
-sub value { $_[0]->[1]; }
-
-#---------------------------------------------------------------#
 package Configure::Option;
 BEGIN { $INC{"Configure/Option.pm"} = $0; }
 
@@ -33,17 +21,6 @@ sub names {
 		else { "$name-$_"; }
 	} @{$_[0]->{'args'}};
 }
-sub items {
-	my @names = $_[0]->names;
-	my @vals = $_[0]->switches;
-	my @pairs;
-	for my $i (0..@names-1) {
-		push @pairs, Configure::Option::pairs->new($names[$i], $vals[$i]);
-	}
-	return @pairs;
-}
-
-use overload '@{}' => sub {[&items]};
 
 #---------------------------------------------------------------#
 package Configure::Option::Enable;

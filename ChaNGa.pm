@@ -59,73 +59,61 @@ sub get_options {
 }
 
 #-----------------------------------------------#
+package ChaNGa::Build::Opts;
+BEGIN { $INC{"ChaNGa/Build/Opts.pm"} = $0; }
+
+{
+	my %opts = (
+	         'arch' => Configure::Option::Enable->new('arch', ('none','sse2','avx')),
+	      'bigkeys' => Configure::Option::Enable->new('bigkeys'),
+	   'changesoft' => Configure::Option::Enable->new('changesoft'),
+	      'cooling' => Configure::Option::Enable->new('cooling', ('none','planet','cosmo','grackle')),
+	  'cullenalpha' => Configure::Option::Enable->new('cullenalpha'),
+	      'damping' => Configure::Option::Enable->new('damping'),
+	   'default-lb' => Configure::Option::Enable->new('default-lb', ('MultistepLB_notopo')),
+	    'diffusion' => Configure::Option::Enable->new('diffusion'),
+	     'dtadjust' => Configure::Option::Enable->new('dtadjust'),
+	'feedbacklimit' => Configure::Option::Enable->new('feedbacklimit'),
+	        'float' => Configure::Option::Enable->new('float'),
+	 'hexadecapole' => Configure::Option::Enable->new('hexadecapole'),
+	      'rtforce' => Configure::Option::Enable->new('rtforce'),
+	   'sph-kernel' => Configure::Option::Enable->new('sph-kernel', ('m4','m6','wendland')),
+	     'vsigvisc' => Configure::Option::Enable->new('vsigvisc')
+	);
+	sub get_opts { return \%opts; }
+}
+
+#-----------------------------------------------#
 package ChaNGa::Build;
 BEGIN { $INC{"ChaNGa/Build.pm"} = $0; }
 
 use base 'Exporter';
-our @EXPORT_OK = qw(%launch_config get_cuda_options
-					get_basic_options get_forcetest_options
-					get_release_options);
+our @EXPORT_OK = qw(get_options);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
-our $cuda 		  = Configure::Option::With->new('cuda');
-our $hexadecapole = Configure::Option::Enable->new('hexadecapole');
-our $simd		  = Configure::Option::Enable->new('simd', ('generic', 'sse2', 'avx'));
-our $float		  = Configure::Option::Enable->new('float');
-our $bigkeys	  = Configure::Option::Enable->new('bigkeys');
-our $changesoft	  = Configure::Option::Enable->new('changesoft');
-our $wendland	  = Configure::Option::Enable->new('wendland');
-our $cooling	  = Configure::Option::Enable->new('cooling', ('no','planet','cosmo','grackle'));
-
-sub get_cuda_options {
-	my @opts = ();
-	my @charm = $Charm::Build::cuda->items;
-	my @changa = $ChaNGa::Build::cuda->items;
-	for my $i (0..@charm-1) {
-		push @opts, {'charm' => $charm[$i], 'changa' => $changa[$i]};
-	}
-	return @opts;
-}
-sub get_basic_options {
-	my @opts = ();
-	for my $hex (@$ChaNGa::Build::hexadecapole) {
-	for my $cs (@$ChaNGa::Build::changesoft) {
-	for my $bg (@$ChaNGa::Build::bigkeys) {
-		push @opts, [$hex, $cs, $bg];
-	}}}
-	return \@opts;
-}
-sub get_forcetest_options {
-	my @opts = ();
-	for my $hex (@$ChaNGa::Build::hexadecapole) {
-	for my $cs (@$ChaNGa::Build::changesoft) {
-	for my $float (@$ChaNGa::Build::float) {
-	for my $simd (@$ChaNGa::Build::simd) {
-		push @opts, [$hex, $cs, $float, $simd];
-	}}}}
-	return \@opts;
-}
-sub get_release_options {
-	my @opts = ();
-	for my $cool (@$ChaNGa::Build::cooling) {
-	for my $bk (@$ChaNGa::Build::bigkeys) {
-		push @opts, [$cool, $bk];
-	}}
-	return \@opts;
-}
-sub get_release_full_options {
-	my @opts = ();
+sub get_options {
+	my ($type, %args) = @_;
+	my @opts;
 	
-	for my $hex (@$ChaNGa::Build::hexadecapole) {
-	for my $cs (@$ChaNGa::Build::changesoft) {
-	for my $float (@$ChaNGa::Build::float) {
-	for my $simd (@$ChaNGa::Build::simd) {
-	for my $bk (@$ChaNGa::Build::bigkeys) {
-	for my $wend (@$ChaNGa::Build::wendland) {
-	for my $cool (@$ChaNGa::Build::cooling) {
-		push @opts, [$hex, $cs, $float, $simd, $bk, $wend, $cool];
-	}}}}}}}
-	return \@opts;
+	if ($type eq 'basic') {
+		push @opts, qw(hexadecapole bigkeys);
+	} elsif ($type eq 'force-test') {
+		push @opts, qw(hexadecapole bigkeys float arch);
+	} elsif($type eq 'release') {
+		push @opts, qw(hexadecapole changesoft float arch bigkeys sph-kernel cooling);
+	} else {
+		# Assume comma-separated list of keys
+		my $opts = ChaNGa::Build::Opts::get_opts();
+		my @keys = split(',', $type);
+		for my $k (@keys) {
+			die "Unknown ChaNGa build option '$k'\n" unless exists $opts->{$k};
+		}
+		push @opts, @keys;
+	}
+	use Set::CrossProduct;
+	my $iter = Set::CrossProduct->new([map {[$_->switches]} @{ChaNGa::Build::Opts::get_opts()}{@opts}]);
+	return $iter->combinations if wantarray;
+	return sub { $iter->get; };
 }
 
 our %launch_config = (

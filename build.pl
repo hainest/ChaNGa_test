@@ -10,7 +10,6 @@ use Cwd qw(cwd);
 use Pod::Usage;
 use Benchmark qw(timediff :hireswallclock);
 
-# TODO: allow builds w/o CUDA
 my %args = (
 	'prefix' 		=> cwd(),
 	'charm-dir'		=> undef,
@@ -21,6 +20,7 @@ my %args = (
 	'charm-options' => '',	# This needs to be an empty string _NOT_ undef
 	'cuda-dir'		=> '',	# This needs to be an empty string _NOT_ undef
 	'build-type'	=> 'basic',
+	'cuda'			=> 1,
 	'njobs' 		=> 2,
 	'fatal-errors'	=> 0,
 	'help' 			=> 0
@@ -28,7 +28,7 @@ my %args = (
 GetOptions(\%args,
 	'prefix=s', 'charm-dir=s', 'changa-dir=s', 'log-file=s',
 	'build-dir=s', 'charm-target=s', 'charm-options=s',
-	'cuda-dir=s', 'build-type=s', 'njobs=i',
+	'cuda-dir=s', 'build-type=s', 'njobs=i', 'cuda!',
 	'fatal-errors!', 'help'
 ) or pod2usage(2);
 
@@ -38,11 +38,6 @@ $args{'changa-dir'} //= "$args{'prefix'}/changa";
 $args{'charm-dir'} //= "$args{'prefix'}/charm";
 $args{'build-dir'} //= "$args{'prefix'}/build";
 $args{'log-file'} //= "$args{'prefix'}/build.log";
-
-# Override the default CUDA flag
-if ($args{'cuda-dir'}) {
-	$ChaNGa::Build::cuda = Configure::Option::With->new('cuda', ($args{'cuda-dir'}, 'no'));
-}
 
 # Save a backup if the log file already exists
 move($args{'log-file'}, "$args{'log-file'}.bak") if -e $args{'log-file'};
@@ -174,6 +169,7 @@ build [options]
    --charm-options=S    Pass options S to charm build (wrap S in quotes to pass many values)
    --cuda-dir           Override CUDA toolkit directory
    --build-type         Type of build test to perform (basic, force-test, release)
+   --[no-]cuda          Enable CUDA tests (default: yes)
    --njobs=N            Number of make jobs (default: N=2)
    --[no-]fatal-errors  Kill build sequence on any error (default: no; errors are reported only)
    --help               Print this help message

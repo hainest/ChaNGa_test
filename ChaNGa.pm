@@ -13,10 +13,50 @@ sub execute($) {
 }
 
 #-----------------------------------------------#
-package Charm::Build;
+package Charm::Build::Opts;
+BEGIN { $INC{"Charm/Build/Opts.pm"} = $0; }
+{
+	my %opts = (
+	   'cuda' => Configure::Option::Positional->new('cuda'),
+	    'smp' => Configure::Option::Positional->new('smp'),
+	);
+	sub get_opts() { return \%opts; }
+}
 
-our $cuda = Configure::Option::Positional->new('cuda');
-our $smp  = Configure::Option::Positional->new('smp');
+#-----------------------------------------------#
+package Charm::Build;
+BEGIN { $INC{"Charm/Build.pm"} = $0; }
+
+use base 'Exporter';
+our @EXPORT_OK = qw(get_options);
+our %EXPORT_TAGS = (all => [@EXPORT_OK]);
+
+sub get_options {
+	my (%args) = @_;
+	my $all_opts = Charm::Build::Opts::get_opts();
+
+	my @opts;	
+	for my $k (keys %args) {
+		die "Unknown Charm++ build option '$k'\n" unless exists $all_opts->{$k}; 
+		push @opts, $k if $args{$k};
+	}
+
+	if (@opts > 1) {
+		use Set::CrossProduct;
+		my $iter = Set::CrossProduct->new([map {[$_->switches]} @{$all_opts}{@opts}]);
+		return $iter->combinations if wantarray;
+		return sub { $iter->get; };
+	}
+	
+	my @switches;
+	if (@opts == 1) {
+		@switches = map {[$_]} $all_opts->{$opts[0]}->switches;
+	} else {
+		push @switches, [('')];
+	}
+	return @switches if wantarray;
+	return sub { shift @switches; };
+}
 
 #-----------------------------------------------#
 package ChaNGa::Build;

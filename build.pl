@@ -32,7 +32,6 @@ GetOptions(\%args,
 	'cuda-dir=s', 'build-type=s', 'cuda!', 'smp!',
 	'njobs=i', 'fatal-errors!', 'help'
 ) or pod2usage(2);
-
 pod2usage( -exitval => 0, -verbose => 99 ) if $args{'help'};
 
 $args{'changa-dir'} //= "$args{'prefix'}/changa";
@@ -157,9 +156,9 @@ __END__
 A tool for automating building Charm++ and ChaNGa
  
 =head1 SYNOPSIS
- 
+
 build [options]
- 
+
  Options:
    --prefix             Base directory for the source and build directories (default: pwd)
    --charm-dir=PATH     Charm directory (default: prefix/charm)

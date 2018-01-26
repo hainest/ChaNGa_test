@@ -22,6 +22,7 @@ A tool for automating building Charm++ and ChaNGa
 	   --[no-]fatal-errors  Kill build sequence on any error (default: no; errors are reported only)
 	   --help               Print this help message
 
+
 ---
 
 Builds are very chatty. I recommend using

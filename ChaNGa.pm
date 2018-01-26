@@ -116,32 +116,4 @@ sub get_options {
 	return sub { $iter->get; };
 }
 
-our %launch_config = (
-	'cuda' => {
-		'smp' => {
-			'pes_per_node'   => 1,
-			'cores_per_pe'   => 30,
-			'threads_per_pe' => [30]
-		},
-		'nosmp' => {
-			'pes_per_node'   => 30,
-			'cores_per_pe'   => 1,
-			'threads_per_pe' => [1]
-		}
-	},
-	'nocuda' => {
-		'smp' => {
-			'pes_per_node'   => 1,
-			'cores_per_pe'   => 15,
-			'threads_per_pe' => [ 1, 2, 4, 8, 15 ]
-		},
-		'nosmp' => {
-			'pes_per_node'   => 15,
-			'cores_per_pe'   => 1,
-			'threads_per_pe' => [1]
-		}
-	}
-);
-
 1;
-

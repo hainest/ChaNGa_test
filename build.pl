@@ -61,9 +61,6 @@ sub build_charm($) {
 		cd $args{'charm-dir'}
 		export CUDA_DIR=$args{'cuda-dir'}
 
-		# Fix for RCA module issues (https://charm.cs.illinois.edu/redmine/issues/534)
-		export PE_PKGCONFIG_LIBS=cray-rca:\$PE_PKGCONFIG_LIBS
-	
 		$cmd
 	");
 	if (!$res) {

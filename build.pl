@@ -1,7 +1,6 @@
 use strict;
 use warnings;
 use Getopt::Long qw(GetOptions);
-use File::Path qw(make_path);
 use File::Copy qw(copy move);
 use Configure;
 use ChaNGa;

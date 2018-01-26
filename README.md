@@ -17,6 +17,7 @@ A tool for automating building Charm++ and ChaNGa
 	   --cuda-dir           Override CUDA toolkit directory
 	   --build-type         Type of build test to perform (basic, force-test, release)
 	   --[no-]cuda          Enable CUDA tests (default: yes)
+	   --[no-]smp           Enable SMP tests (default: no)
 	   --njobs=N            Number of make jobs (default: N=2)
 	   --[no-]fatal-errors  Kill build sequence on any error (default: no; errors are reported only)
 	   --help               Print this help message

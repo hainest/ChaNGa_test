@@ -21,6 +21,7 @@ my %args = (
 	'cuda-dir'		=> '',	# This needs to be an empty string _NOT_ undef
 	'build-type'	=> 'basic',
 	'cuda'			=> 1,
+	'smp'			=> 0,
 	'njobs' 		=> 2,
 	'fatal-errors'	=> 0,
 	'help' 			=> 0
@@ -28,8 +29,8 @@ my %args = (
 GetOptions(\%args,
 	'prefix=s', 'charm-dir=s', 'changa-dir=s', 'log-file=s',
 	'build-dir=s', 'charm-target=s', 'charm-options=s',
-	'cuda-dir=s', 'build-type=s', 'njobs=i', 'cuda!',
-	'fatal-errors!', 'help'
+	'cuda-dir=s', 'build-type=s', 'cuda!', 'smp!',
+	'njobs=i', 'fatal-errors!', 'help'
 ) or pod2usage(2);
 
 pod2usage( -exitval => 0, -verbose => 99 ) if $args{'help'};
@@ -170,6 +171,7 @@ build [options]
    --cuda-dir           Override CUDA toolkit directory
    --build-type         Type of build test to perform (basic, force-test, release)
    --[no-]cuda          Enable CUDA tests (default: yes)
+   --[no-]smp           Enable SMP tests (default: no)
    --njobs=N            Number of make jobs (default: N=2)
    --[no-]fatal-errors  Kill build sequence on any error (default: no; errors are reported only)
    --help               Print this help message

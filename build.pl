@@ -20,9 +20,7 @@ my %args = (
 	'charm-target' 	=> 'netlrts-linux-x86_64',
 	'charm-options' => '',	# This needs to be an empty string _NOT_ undef
 	'cuda-dir'		=> '',	# This needs to be an empty string _NOT_ undef
-	'force-test'	=> 0,
-	'release'		=> 0,
-	'basic'			=> 0,
+	'build-type'	=> 'basic',
 	'njobs' 		=> 2,
 	'fatal-errors'	=> 0,
 	'help' 			=> 0
@@ -30,7 +28,7 @@ my %args = (
 GetOptions(\%args,
 	'prefix=s', 'charm-dir=s', 'changa-dir=s', 'log-file=s',
 	'build-dir=s', 'charm-target=s', 'charm-options=s',
-	'cuda-dir=s', 'force-test', 'release', 'basic', 'njobs=i',
+	'cuda-dir=s', 'build-type=s', 'njobs=i',
 	'fatal-errors!', 'help'
 ) or pod2usage(2);
 
@@ -40,14 +38,6 @@ $args{'changa-dir'} //= "$args{'prefix'}/changa";
 $args{'charm-dir'} //= "$args{'prefix'}/charm";
 $args{'build-dir'} //= "$args{'prefix'}/build";
 $args{'log-file'} //= "$args{'prefix'}/build.log";
-
-# Only allow one test type to be specified
-if (($args{'basic'} + $args{'force-test'} + $args{'release'}) > 1) {
-	pod2usage("$0: Too many build types specified\n");
-}
-
-# By default, use the 'basic' test type
-$args{'basic'} = int(!($args{'force-test'} || $args{'release'}));
 
 # Override the default CUDA flag
 if ($args{'cuda-dir'}) {
@@ -116,36 +106,21 @@ sub build_changa($) {
 	}
 }
 
-if ($args{'basic'}) {
-	for my $cuda (get_cuda_options()) {
-		build_charm($cuda->{'charm'}->value);
-	for my $o (@{get_basic_options()}) {
-		my $opts = join(' ', map {$_->value} ($cuda->{'changa'}, @$o));
-		build_changa($opts);
-	}}
-} elsif ($args{'force-test'}) {
-	make_path($args{'build-dir'}) if ! -d $args{'build-dir'};
+my $charm_opts = Charm::Build::get_options(map {$_ => $args{$_}} ('cuda','smp'));
+while (my $charm = $charm_opts->()) {
+	build_charm("@$charm");
 	
-	for my $cuda (get_cuda_options()) {
-	for my $smp (@$Charm::Build::smp) {
-		build_charm(join(' ', $cuda->{'charm'}->value, $smp->value));
-	for my $o (@{get_forcetest_options()}) {
-		my $opts = join(' ', map {$_->value} ($cuda->{'changa'}, @$o));
-		build_changa($opts);
-		my $suffix = join('_', map {$_->key} (($cuda->{'changa'}, $smp, @$o)));
-		copy("$args{'changa-dir'}/ChaNGa", "$args{'build-dir'}/ChaNGa_$suffix") or die "Copy failed: $!";
-	}}}
-} elsif ($args{'release'}) {
-	$ChaNGa::Build::cooling = Configure::Option::Enable->new('cooling', ('no','cosmo'));
-	make_path($args{'build-dir'}) if ! -d $args{'build-dir'};
-	
-	for my $smp (@$Charm::Build::smp) {
-		build_charm($smp->value);
-	for my $o (@{get_release_options()}) {
-		build_changa(@$o);
-		my $suffix = join('_', map {$_->key} ($smp, @$o));
-		copy("$args{'changa-dir'}/ChaNGa", "$args{'build-dir'}/ChaNGa_$suffix") or die "Copy failed: $!";
-	}}
+	use List::Util qw(any);
+	my $is_cuda = any {$_ eq 'cuda' } @$charm;
+
+	# Always run a build with minimum options
+	build_changa($is_cuda ? "--with-cuda=$args{'cuda-dir'}" : '');
+
+	my $changa_opts = ChaNGa::Build::get_options($args{'build-type'});
+	while (my $changa = $changa_opts->()) {
+		push @{$changa}, "--with-cuda=$args{'cuda-dir'}" if $is_cuda;
+		build_changa("@$changa");
+	}
 }
 
 sub mean {
@@ -198,9 +173,7 @@ build [options]
    --charm-target=T     Build charm++ for target T (default: netlrts-linux-x86_64)
    --charm-options=S    Pass options S to charm build (wrap S in quotes to pass many values)
    --cuda-dir           Override CUDA toolkit directory
-   --force-test         Build executables for performing force accuracy tests (default: no)
-   --release            Run complete set of build tests for ChaNGa release (default: no)
-   --basic              Run only basic set of build tests (default: yes)
+   --build-type         Type of build test to perform (basic, force-test, release)
    --njobs=N            Number of make jobs (default: N=2)
    --[no-]fatal-errors  Kill build sequence on any error (default: no; errors are reported only)
    --help               Print this help message

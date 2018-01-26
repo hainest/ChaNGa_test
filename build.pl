@@ -172,4 +172,13 @@ build [options]
    --[no-]fatal-errors  Kill build sequence on any error (default: no; errors are reported only)
    --help               Print this help message
 
+=head1 NOTES
+
+In addition to the predefined build types (basic, force-test, and release), you can specify a
+comma-separated list of configure targets to build. For example,
+
+	build.pl --build-type=hexadecapole,float
+	
+will test the HEXADECAPOLE and COSMO_FLOAT options (note: CUDA is still enabled here; to disable, use --no-cuda). 
+
 =cut

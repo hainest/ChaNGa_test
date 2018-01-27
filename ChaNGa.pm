@@ -17,8 +17,9 @@ package Charm::Build::Opts;
 BEGIN { $INC{"Charm/Build/Opts.pm"} = $0; }
 {
 	my %opts = (
-	   'cuda' => Configure::Option::Positional->new('cuda'),
-	    'smp' => Configure::Option::Positional->new('smp'),
+		   'cuda' => Configure::Option::Positional->new('cuda'),
+		    'smp' => Configure::Option::Positional->new('smp'),
+	'projections' => Configure::Option::Enable->new('tracing')
 	);
 	sub get_opts() { return \%opts; }
 }

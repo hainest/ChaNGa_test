@@ -22,6 +22,7 @@ my %args = (
 	'build-type'	=> 'basic',
 	'cuda'			=> 1,
 	'smp'			=> 0,
+	'projections'   => 0,
 	'njobs' 		=> 2,
 	'fatal-errors'	=> 0,
 	'help' 			=> 0
@@ -30,7 +31,7 @@ GetOptions(\%args,
 	'prefix=s', 'charm-dir=s', 'changa-dir=s', 'log-file=s',
 	'build-dir=s', 'charm-target=s', 'charm-options=s',
 	'cuda-dir=s', 'build-type=s', 'cuda!', 'smp!',
-	'njobs=i', 'fatal-errors!', 'help'
+	'projections!', 'njobs=i', 'fatal-errors!', 'help'
 ) or pod2usage(2);
 pod2usage( -exitval => 0, -verbose => 99 ) if $args{'help'};
 
@@ -98,12 +99,13 @@ sub build_changa($) {
 	}
 }
 
-my $charm_opts = Charm::Build::get_options(map {$_ => $args{$_}} ('cuda','smp'));
+my $charm_opts = Charm::Build::get_options(map {$_ => $args{$_}} ('cuda','smp','projections'));
 while (my $charm = $charm_opts->()) {
 	build_charm("@$charm");
 	
 	use List::Util qw(any);
 	my $is_cuda = any {$_ eq 'cuda' } @$charm;
+	my $is_proj = any {$_ eq '--enable-tracing=yes' } @$charm;
 
 	# Always run a build with minimum options
 	build_changa($is_cuda ? "--with-cuda=$args{'cuda-dir'}" : '');
@@ -111,6 +113,7 @@ while (my $charm = $charm_opts->()) {
 	my $changa_opts = ChaNGa::Build::get_options($args{'build-type'});
 	while (my $changa = $changa_opts->()) {
 		push @{$changa}, "--with-cuda=$args{'cuda-dir'}" if $is_cuda;
+		push @{$changa}, "--enable-projections" if $is_proj;
 		build_changa("@$changa");
 	}
 }
@@ -168,6 +171,7 @@ build [options]
    --build-type         Type of build test to perform (basic, force-test, release)
    --[no-]cuda          Enable CUDA tests (default: yes)
    --[no-]smp           Enable SMP tests (default: no)
+   --[no-]projections   Enable Projections tests (default: no)
    --njobs=N            Number of make jobs (default: N=2)
    --[no-]fatal-errors  Kill build sequence on any error (default: no; errors are reported only)
    --help               Print this help message

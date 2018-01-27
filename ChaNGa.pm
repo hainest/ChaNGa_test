@@ -77,6 +77,7 @@ BEGIN { $INC{"ChaNGa/Build/Opts.pm"} = $0; }
 	        'float' => Configure::Option::Enable->new('float'),
 	 'hexadecapole' => Configure::Option::Enable->new('hexadecapole'),
 	      'rtforce' => Configure::Option::Enable->new('rtforce'),
+	    'sanitizer' => Configure::Option::Enable->new('sanitizer', ('none', 'address', 'thread')),
 	   'sph-kernel' => Configure::Option::Enable->new('sph-kernel', ('m4','m6','wendland')),
 	     'vsigvisc' => Configure::Option::Enable->new('vsigvisc')
 	);

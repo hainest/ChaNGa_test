@@ -74,7 +74,7 @@ sub build_charm($) {
 }
 sub build_changa($) {
 	my $opts = shift;
-	print $fdLog "Building ChaNGa using '$opts'... ";
+	print $fdLog "Building ChaNGa using '$opts -j$args{'njobs'}'... ";
 	if( -e "$args{'changa-dir'}/Makefile") {
 		execute("
 			cd $args{'changa-dir'}

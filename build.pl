@@ -99,6 +99,7 @@ sub build_changa($) {
 	}
 }
 
+print $fdLog "Start time: ", scalar localtime, "\n";
 my $charm_opts = Charm::Build::get_options(map {$_ => $args{$_}} ('cuda','smp','projections'));
 while (my $charm = $charm_opts->()) {
 	build_charm("@$charm");
@@ -117,6 +118,7 @@ while (my $charm = $charm_opts->()) {
 		build_changa("@$changa");
 	}
 }
+print $fdLog "End time: ", scalar localtime, "\n";
 
 sub mean {
 	use List::Util qw(sum);

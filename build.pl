@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Getopt::Long qw(GetOptions);
 use File::Copy qw(copy move);
+use File::Path qw(make_path);
 use Configure;
 use ChaNGa;
 use ChaNGa::Util qw(execute);
@@ -43,6 +44,9 @@ $args{'log-file'} //= "$args{'prefix'}/build.log";
 # Save a backup if the log file already exists
 move($args{'log-file'}, "$args{'log-file'}.bak") if -e $args{'log-file'};
 open my $fdLog, '>', $args{'log-file'} or die "Unable to open $args{'log-file'}: $!\n";
+
+# Create the build directory
+make_path($args{'build-dir'});
 
 my %build_times = (
 	'charm' => [],

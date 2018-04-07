@@ -95,14 +95,14 @@ our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 sub get_options {
 	my ($type, %args) = @_;
-	my @opts;
+	my @names;
 	
 	if ($type eq 'basic') {
-		push @opts, qw(hexadecapole bigkeys);
+		push @names, qw(hexadecapole bigkeys);
 	} elsif ($type eq 'force-test') {
-		push @opts, qw(hexadecapole bigkeys float arch);
+		push @names, qw(hexadecapole bigkeys float arch);
 	} elsif($type eq 'release') {
-		push @opts, qw(hexadecapole changesoft float arch bigkeys sph-kernel cooling);
+		push @names, qw(hexadecapole changesoft float arch bigkeys sph-kernel cooling);
 	} else {
 		# Assume comma-separated list of keys
 		my $opts = ChaNGa::Build::Opts::get_opts();
@@ -110,10 +110,10 @@ sub get_options {
 		for my $k (@keys) {
 			die "Unknown ChaNGa build option '$k'\n" unless exists $opts->{$k};
 		}
-		push @opts, @keys;
+		push @names, @keys;
 	}
 	use Set::CrossProduct;
-	my $iter = Set::CrossProduct->new([map {[$_->switches]} @{ChaNGa::Build::Opts::get_opts()}{@opts}]);
+	my $iter = Set::CrossProduct->new([map {[$_->switches]} @{ChaNGa::Build::Opts::get_opts()}{@names}]);
 	return $iter->combinations if wantarray;
 	return sub { $iter->get; };
 }

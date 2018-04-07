@@ -112,10 +112,23 @@ sub get_options {
 		}
 		push @names, @keys;
 	}
-	use Set::CrossProduct;
-	my $iter = Set::CrossProduct->new([map {[$_->switches]} @{ChaNGa::Build::Opts::get_opts()}{@names}]);
-	return $iter->combinations if wantarray;
-	return sub { $iter->get; };
+	
+	my $all_options = ChaNGa::Build::Opts::get_opts();
+	if (@names > 1) {
+		use Set::CrossProduct;
+		my $iter = Set::CrossProduct->new([map {[$_->switches]} @{$all_options}{@names}]);
+		return $iter->combinations if wantarray;
+		return sub { $iter->get; };
+	}
+	
+	my @switches;
+	if (@names == 1) {
+		@switches = map {[$_]} $all_options->{$names[0]}->switches;
+	} else {
+		push @switches, [('')];
+	}
+	return @switches if wantarray;
+	return sub { shift @switches; };
 }
 
 1;

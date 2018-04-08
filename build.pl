@@ -130,7 +130,7 @@ while (my $charm = $charm_opts->()) {
 			$suffix .= ChaNGa::Build::Opts::make_short_name("@$changa");
 			my $src = "$args{'changa-dir'}/ChaNGa";
 			my $dst = "$args{'build-dir'}/ChaNGa$suffix"; 
-			copy($src, $dst) or die "copy of '$src' to '$dst' failed: $!\n";
+			copy($src, $dst) or die "copying '$src' to '$dst' failed: $!\n";
 			chmod 0755, $dst;
 		}
 	}

@@ -180,8 +180,8 @@ build [options]
 
  Options:
    --prefix             Base directory for the source and build directories (default: pwd)
-   --charm-dir=PATH     Charm directory (default: prefix/charm)
-   --changa-dir=PATH    ChaNGa directory (default: prefix/changa)
+   --charm-dir=PATH     Charm source directory (default: prefix/charm)
+   --changa-dir=PATH    ChaNGa source directory (default: prefix/changa)
    --log-file=FILE      Store logging data in FILE (default: prefix/build.log)
    --build-dir          Directory where outputs are stored (default: prefix/build)
    --charm-target=T     Build charm++ for target T (default: netlrts-linux-x86_64)

@@ -116,9 +116,6 @@ while (my $charm = $charm_opts->()) {
 	my $is_smp  = any {$_ eq 'smp' } @$charm;
 	my $is_proj = any {$_ eq '--enable-tracing=yes' } @$charm;
 
-	# Always run a build with minimum options
-	build_changa($is_cuda ? "--with-cuda=$args{'cuda-dir'}" : '');
-
 	my $changa_opts = ChaNGa::Build::get_options($args{'build-type'});
 	while (my $changa = $changa_opts->()) {
 		push @{$changa}, "--with-cuda=$args{'cuda-dir'}" if $is_cuda;

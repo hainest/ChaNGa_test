@@ -115,7 +115,7 @@ sub get_options {
 		push @names, qw(hexadecapole bigkeys float arch);
 	} elsif($type eq 'release') {
 		push @names, qw(hexadecapole changesoft float arch bigkeys sph-kernel cooling);
-	} else {
+	} elsif ($type ne 'default') {
 		# Assume comma-separated list of keys
 		my $opts = ChaNGa::Build::Opts::get_opts();
 		my @keys = split(',', $type);

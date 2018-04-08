@@ -20,7 +20,7 @@ my %args = (
 	'charm-target' 	=> 'netlrts-linux-x86_64',
 	'charm-options' => '',	# This needs to be an empty string _NOT_ undef
 	'cuda-dir'		=> '',	# This needs to be an empty string _NOT_ undef
-	'build-type'	=> 'basic',
+	'build-type'	=> 'default',
 	'cuda'			=> 1,
 	'smp'			=> 0,
 	'projections'   => 0,
@@ -190,7 +190,7 @@ build [options]
    --charm-target=T     Build charm++ for target T (default: netlrts-linux-x86_64)
    --charm-options=S    Pass options S to charm build (wrap S in quotes to pass many values)
    --cuda-dir           Override CUDA toolkit directory
-   --build-type         Type of build test to perform (basic, force-test, release)
+   --build-type         Type of build test to perform (default, basic, force-test, release)
    --[no-]cuda          Enable CUDA tests (default: yes)
    --[no-]smp           Enable SMP tests (default: no)
    --[no-]projections   Enable Projections tests (default: no)
@@ -202,7 +202,7 @@ build [options]
 
 =head1 NOTES
 
-In addition to the predefined build types (basic, force-test, and release), you can specify a
+In addition to the predefined build types (default, basic, force-test, and release), you can specify a
 comma-separated list of configure targets to build. For example,
 
 	build.pl --build-type=hexadecapole,float

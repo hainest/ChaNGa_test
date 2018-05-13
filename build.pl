@@ -129,7 +129,11 @@ while (my $charm = $charm_opts->()) {
 			$suffix .= '_smp'  if $is_smp;
 			$suffix .= ChaNGa::Build::Opts::make_short_name("@$changa");
 			my $src = "$args{'changa-dir'}/ChaNGa";
-			my $dst = "$args{'build-dir'}/ChaNGa$suffix"; 
+			my $dst = "$args{'build-dir'}/ChaNGa$suffix";
+			copy($src, $dst) or die "copying '$src' to '$dst' failed: $!\n";
+			chmod 0755, $dst;
+			$src = "$args{'changa-dir'}/charmrun";
+			$dst = "$args{'build-dir'}/charmrun$suffix"; 
 			copy($src, $dst) or die "copying '$src' to '$dst' failed: $!\n";
 			chmod 0755, $dst;
 		}

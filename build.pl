@@ -1,5 +1,7 @@
 use strict;
 use warnings;
+use Cwd qw(cwd);
+use lib cwd();
 use Getopt::Long qw(GetOptions);
 use File::Copy qw(copy move);
 use File::Path qw(make_path);

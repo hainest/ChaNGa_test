@@ -113,7 +113,7 @@ my $charm_opts = Charm::Build::get_options(map {$_ => $args{$_}} ('cuda','smp','
 while (my $charm = $charm_opts->()) {
 	build_charm("@$charm") if $args{'charm'};
 	
-	use List::Util qw(any);
+	use List::MoreUtils qw(any);
 	my $is_cuda = any {$_ eq 'cuda' } @$charm;
 	my $is_smp  = any {$_ eq 'smp' } @$charm;
 	my $is_proj = any {$_ eq '--enable-tracing=yes' } @$charm;

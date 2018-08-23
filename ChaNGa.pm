@@ -106,6 +106,7 @@ BEGIN { $INC{"ChaNGa/Build/Opts.pm"} = $0; }
 	'feedbacklimit' => Configure::Option::Enable->new('feedbacklimit'),
 	        'float' => Configure::Option::Enable->new('float'),
 	 'hexadecapole' => Configure::Option::Enable->new('hexadecapole'),
+	    'interlist' => Configure::Option::Enable->new('interlist', ('1', '2')),
 	      'rtforce' => Configure::Option::Enable->new('rtforce'),
 	    'sanitizer' => Configure::Option::Enable->new('sanitizer', ('none', 'address', 'thread')),
 	   'sph-kernel' => Configure::Option::Enable->new('sph-kernel', ('m4','m6','wendland')),

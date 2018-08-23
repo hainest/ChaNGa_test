@@ -7,7 +7,7 @@ use File::Copy qw(copy move);
 use File::Path qw(make_path);
 use Configure;
 use ChaNGa;
-use ChaNGa::Util qw(execute);
+use ChaNGa::Util qw(execute any);
 use ChaNGa::Build qw(:all);
 use Cwd qw(cwd);
 use Pod::Usage;
@@ -113,7 +113,6 @@ my $charm_opts = Charm::Build::get_options(map {$_ => $args{$_}} ('cuda','smp','
 while (my $charm = $charm_opts->()) {
 	build_charm("@$charm") if $args{'charm'};
 	
-	use List::Util qw(any);
 	my $is_cuda = any {$_ eq 'cuda' } @$charm;
 	my $is_smp  = any {$_ eq 'smp' } @$charm;
 	my $is_proj = any {$_ eq '--enable-tracing=yes' } @$charm;

@@ -4,7 +4,36 @@ package ChaNGa::Util;
 BEGIN { $INC{"ChaNGa/Util.pm"} = $0; }
 
 use base 'Exporter';
-our @EXPORT_OK = qw(execute);
+our @EXPORT_OK = qw(execute any);
+
+my ($have_list_util, $have_list_moreutils);
+BEGIN {
+    eval {
+		require List::Util;
+		List::Util->import();
+		$have_list_util = defined &List::Util::any;
+		
+		require List::MoreUtils;
+		List::MoreUtils->import();
+		$have_list_moreutils = defined &List::MoreUtils::any;
+    };
+}
+
+sub any(&@) {
+	my $code = \&{shift @_};
+	
+	if ($have_list_util) {
+		return List::Util::any {$code->()} @_;
+	}
+	if ($have_list_moreutils) {
+		return List::MoreUtils::any {$code->()} @_;
+	}
+
+	for (@_) {
+		return !!1 if $code->();
+	}
+	return !!0;
+}
 
 sub execute($) {
 	my $cmd = shift;

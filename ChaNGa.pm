@@ -6,33 +6,28 @@ BEGIN { $INC{"ChaNGa/Util.pm"} = $0; }
 use base 'Exporter';
 our @EXPORT_OK = qw(execute any);
 
-my ($have_list_util, $have_list_moreutils);
 BEGIN {
     eval {
 		require List::Util;
 		List::Util->import();
-		$have_list_util = defined &List::Util::any;
-		
-		require List::MoreUtils;
-		List::MoreUtils->import();
-		$have_list_moreutils = defined &List::MoreUtils::any;
+		if(defined &List::Util::any) {
+			*any = \&List::Util::any;
+		} else {
+			require List::MoreUtils;
+			List::MoreUtils->import();
+			if(defined &List::MoreUtils::any) {
+				*any = \&List::MoreUtils::any;
+			} else {
+				*any = sub (&@) {
+					my $code = \&{shift @_};
+					for (@_) {
+						return !!1 if $code->();
+					}
+					return !!0;
+				};
+			}
+		}
     };
-}
-
-sub any(&@) {
-	my $code = \&{shift @_};
-	
-	if ($have_list_util) {
-		return List::Util::any {$code->()} @_;
-	}
-	if ($have_list_moreutils) {
-		return List::MoreUtils::any {$code->()} @_;
-	}
-
-	for (@_) {
-		return !!1 if $code->();
-	}
-	return !!0;
 }
 
 sub execute($) {

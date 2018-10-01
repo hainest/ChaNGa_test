@@ -105,7 +105,8 @@ BEGIN { $INC{"ChaNGa/Build/Opts.pm"} = $0; }
 	      'rtforce' => Configure::Option::Enable->new('rtforce'),
 	    'sanitizer' => Configure::Option::Enable->new('sanitizer', ('none', 'address', 'thread')),
 	   'sph-kernel' => Configure::Option::Enable->new('sph-kernel', ('m4','m6','wendland')),
-	     'vsigvisc' => Configure::Option::Enable->new('vsigvisc')
+	     'vsigvisc' => Configure::Option::Enable->new('vsigvisc'),
+   'gpu-local-walk' => Configure::Option::Enable->new('gpu-local-tree-walk')
 	);
 	sub get_opts { return \%opts; }
 }
@@ -135,7 +136,7 @@ sub get_options {
 	my @names;
 	
 	if ($type eq 'basic') {
-		push @names, qw(hexadecapole bigkeys);
+		push @names, qw(hexadecapole bigkeys gpu-local-walk);
 	} elsif ($type eq 'force-test') {
 		push @names, qw(hexadecapole bigkeys float arch);
 	} elsif($type eq 'release') {

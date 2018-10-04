@@ -67,9 +67,9 @@ sub get_options {
 	my (%args) = @_;
 	my $all_opts = Charm::Build::Opts::get_opts();
 
-	my @opts;	
+	my @opts;
 	for my $k (keys %args) {
-		die "Unknown Charm++ build option '$k'\n" unless exists $all_opts->{$k}; 
+		die "Unknown Charm++ build option '$k'\n" unless exists $all_opts->{$k};
 		push @opts, $k if $args{$k};
 	}
 
@@ -78,7 +78,7 @@ sub get_options {
 		return $iter->combinations if wantarray;
 		return sub { $iter->get; };
 	}
-	
+
 	my @switches;
 	if (@opts == 1) {
 		@switches = map {[$_]} $all_opts->{$opts[0]}->switches;
@@ -140,7 +140,7 @@ our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 sub get_options {
 	my ($type, %args) = @_;
 	my @names;
-	
+
 	if ($type eq 'basic') {
 		push @names, qw(hexadecapole bigkeys gpu-local-walk);
 	} elsif ($type eq 'force-test') {
@@ -156,14 +156,14 @@ sub get_options {
 		}
 		push @names, @keys;
 	}
-	
+
 	my $all_options = ChaNGa::Build::Opts::get_opts();
 	if (@names > 1) {
 		my $iter = ChaNGa::Util::combinations([[''], map {[$_->switches]} @{$all_options}{@names}]);
 		return $iter->combinations if wantarray;
 		return sub { $iter->get; };
 	}
-	
+
 	my @switches = (['']);
 	if (@names == 1) {
 		for my $s ($all_options->{$names[0]}->switches) {

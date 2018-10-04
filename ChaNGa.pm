@@ -4,7 +4,7 @@ package ChaNGa::Util;
 BEGIN { $INC{"ChaNGa/Util.pm"} = $0; }
 
 use base 'Exporter';
-our @EXPORT_OK = qw(execute any);
+our @EXPORT_OK = qw(execute any combinations);
 
 BEGIN {
     eval {
@@ -28,6 +28,13 @@ BEGIN {
 			}
 		}
     };
+}
+
+sub combinations {
+	use Set::CrossProduct;
+	use Data::Dumper;
+	my $arg = (@_ == 1 && ref $_[0] eq ref []) ? $_[0] : [@_];
+	return Set::CrossProduct->new($arg);
 }
 
 sub execute($) {
@@ -67,8 +74,7 @@ sub get_options {
 	}
 
 	if (@opts > 1) {
-		use Set::CrossProduct;
-		my $iter = Set::CrossProduct->new([map {[$_->switches]} @{$all_opts}{@opts}]);
+		my $iter = ChaNGa::Util::combinations([map {[$_->switches]} @{$all_opts}{@opts}]);
 		return $iter->combinations if wantarray;
 		return sub { $iter->get; };
 	}
@@ -153,8 +159,7 @@ sub get_options {
 	
 	my $all_options = ChaNGa::Build::Opts::get_opts();
 	if (@names > 1) {
-		use Set::CrossProduct;
-		my $iter = Set::CrossProduct->new([[''], map {[$_->switches]} @{$all_options}{@names}]);
+		my $iter = ChaNGa::Util::combinations([[''], map {[$_->switches]} @{$all_options}{@names}]);
 		return $iter->combinations if wantarray;
 		return sub { $iter->get; };
 	}

@@ -86,7 +86,7 @@ sub build_changa {
 	my $res = execute("
 		cd $dest
 		export CHARM_DIR=\"$charm_src\"
-		./configure $opts
+		$args{'changa-dir'}/configure $opts
 		make -j$args{'njobs'}
 	");
 	if (!$res) {
@@ -99,37 +99,47 @@ sub build_changa {
 }
 
 print $fdLog "Start time: ", scalar localtime, "\n";
-my $charm_opts = Charm::Build::get_options(map {$_ => $args{$_}} ('cuda','smp','projections'));
-while (my $charm = $charm_opts->()) {
-	build_charm("@$charm") if $args{'charm'};
-	
-	my $is_cuda = any {$_ eq 'cuda' } @$charm;
-	my $is_smp  = any {$_ eq 'smp' } @$charm;
-	my $is_proj = any {$_ eq '--enable-tracing=yes' } @$charm;
 
-	my $changa_opts = ChaNGa::Build::get_options($args{'build-type'});
-	while (my $changa = $changa_opts->()) {
-		push @{$changa}, "--with-cuda=$args{'cuda-dir'}" if $is_cuda;
-		push @{$changa}, "--enable-projections" if $is_proj;
-		build_changa("@$changa");
-		
-		if($args{'save-binaries'}) {
-			my $suffix = '';
-			$suffix .= '_cuda' if $is_cuda;
-			$suffix .= '_proj' if $is_proj;
-			$suffix .= '_smp'  if $is_smp;
-			$suffix .= ChaNGa::Build::Opts::make_short_name("@$changa");
-			my $src = "$args{'changa-dir'}/ChaNGa";
-			my $dst = "$args{'build-dir'}/ChaNGa$suffix";
-			copy($src, $dst) or die "copying '$src' to '$dst' failed: $!\n";
-			chmod 0755, $dst;
-			$src = "$args{'changa-dir'}/charmrun";
-			$dst = "$args{'build-dir'}/charmrun$suffix"; 
-			copy($src, $dst) or die "copying '$src' to '$dst' failed: $!\n";
-			chmod 0755, $dst;
+my @charm_opts = grep {$args{$_} == 1} keys %{Charm::Build::Opts::get_opts()};
+my %charm_config = Charm::Build::get_config(@charm_opts);
+
+my %build_times = (
+	'charm' => [],
+	'changa' => []
+);
+
+# Build all the versions of Charm++
+if ($args{'charm'}) {
+	for my $src_dir (keys %charm_config) {
+		my $dest = "$args{'build-dir'}/charm/$src_dir";
+		my $cur = $charm_config{$src_dir};
+		my $switches = (ref $cur eq ref []) ? join(' ', @{$cur}) : $cur;
+		push @{$build_times{'charm'}}, build_charm($dest, $switches);
+	}
+}
+
+# Build all the versions of ChaNGa
+if ($args{'changa'}) {
+	my $i = 0;
+	for my $src_dir (keys %charm_config) {
+		my $dest = "$args{'build-dir'}/changa/$src_dir";
+		my $cur = $charm_config{$src_dir};
+		my $switches = (ref $cur eq ref []) ? join(' ', @{$cur}) : $cur;
+	
+		my $is_cuda = $src_dir =~ /cuda/;
+		my $is_smp  = $src_dir =~ /smp/;
+		my $is_proj = $src_dir =~ /projections/;
+	
+		my $changa_opts = ChaNGa::Build::get_options($args{'build-type'});
+		while (my $changa = $changa_opts->()) {
+			push @{$changa}, "--with-cuda=$args{'cuda-dir'}" if $is_cuda;
+			push @{$changa}, "--enable-projections" if $is_proj;
+			my $dest = "$args{'build-dir'}/changa/$i";
+			build_changa("$args{'build-dir'}/charm/$src_dir", $dest, $i++, "@$changa");
 		}
 	}
 }
+
 print $fdLog "End time: ", scalar localtime, "\n";
 
 sub mean {

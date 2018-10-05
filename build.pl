@@ -77,11 +77,11 @@ sub build_charm {
 	}
 	return timediff(Benchmark->new(), $begin)->real;
 }
-sub build_changa($) {
-	my ($charm_src, $dest, $opts) = @_;
-	print $fdLog "Building ChaNGa using '$opts -j$args{'njobs'}'... ";
+sub build_changa {
+	my ($charm_src, $dest, $idx, $opts) = @_;
+	print $fdLog "$idx: Building ChaNGa using '$opts -j$args{'njobs'}'... ";
 	make_path($dest);
-
+	
 	my $begin = Benchmark->new();
 	my $res = execute("
 		cd $dest

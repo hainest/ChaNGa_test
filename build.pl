@@ -54,11 +54,6 @@ open my $fdLog, '>', $args{'log-file'} or die "Unable to open $args{'log-file'}:
 # Create the build directory
 make_path($args{'build-dir'});
 
-my %build_times = (
-	'charm' => [],
-	'changa' => []
-);
-
 sub build_charm($) {
 	my $opts = shift;
 	my $cmd = "./build ChaNGa $args{'charm-target'} $args{'charm-options'} $opts --with-production --enable-lbuserdata -j$args{'njobs'}";
@@ -78,9 +73,9 @@ sub build_charm($) {
 		print $fdLog "FAILED\n";
 		exit if $args{'fatal-errors'};
 	} else {
-		push @{$build_times{'charm'}}, timediff(Benchmark->new(), $begin)->real;
 		print $fdLog "OK\n";
 	}
+	return timediff(Benchmark->new(), $begin)->real;
 }
 sub build_changa($) {
 	my $opts = shift;
@@ -104,9 +99,9 @@ sub build_changa($) {
 		print $fdLog "FAILED\n";
 		exit if $args{'fatal-errors'};
 	} else {
-		push @{$build_times{'changa'}}, timediff(Benchmark->new(), $begin)->real;
 		print $fdLog "OK\n";
 	}
+	return timediff(Benchmark->new(), $begin)->real;
 }
 
 print $fdLog "Start time: ", scalar localtime, "\n";

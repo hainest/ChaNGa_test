@@ -46,6 +46,9 @@ $args{'charm-dir'} //= "$args{'prefix'}/charm";
 $args{'build-dir'} //= "$args{'prefix'}/build";
 $args{'log-file'} //= "$args{'prefix'}/build.log";
 
+# Sanity check
+die "Must build at least one configuration\n" if !$args{'charm'} && !$args{'changa'};
+
 # Save a backup if the log file already exists
 move($args{'log-file'}, "$args{'log-file'}.bak") if -e $args{'log-file'};
 open my $fdLog, '>', $args{'log-file'} or die "Unable to open $args{'log-file'}: $!\n";

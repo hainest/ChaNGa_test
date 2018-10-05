@@ -54,20 +54,18 @@ open my $fdLog, '>', $args{'log-file'} or die "Unable to open $args{'log-file'}:
 # Create the build directory
 make_path($args{'build-dir'});
 
-sub build_charm($) {
-	my $opts = shift;
-	my $cmd = "./build ChaNGa $args{'charm-target'} $args{'charm-options'} $opts --with-production --enable-lbuserdata -j$args{'njobs'}";
-	print $fdLog "Building charm++ using '$cmd'... ";
-	execute("
-		cd $args{'charm-dir'}
-		rm -rf bin include lib lib_so tmp VERSION $args{'charm-target'}*
-	");
+sub build_charm {
+	my ($dest, $opts) = @_;
+	print $fdLog "Building charm++ using '$opts'... ";
+	make_path($dest);
+	
 	my $begin = Benchmark->new();
 	my $res = execute("
-		cd $args{'charm-dir'}
+		cd $dest
 		export CUDA_DIR=$args{'cuda-dir'}
 
-		$cmd
+		cd $dest
+		$args{'charm-dir'}/build ChaNGa $args{'charm-target'} $args{'charm-options'} $opts --with-production --enable-lbuserdata -j$args{'njobs'}
 	");
 	if (!$res) {
 		print $fdLog "FAILED\n";

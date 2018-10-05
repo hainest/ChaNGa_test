@@ -139,18 +139,6 @@ BEGIN { $INC{"ChaNGa/Build/Opts.pm"} = $0; }
 	sub get_opts { return \%opts; }
 }
 
-sub make_short_name {
-	my $name = '';
-	for my $switch (split(' ', $_[0])) {
-		if($switch =~ /--enable-(.+)?\=(.+)/) {
-			$name .= "_$1" if $2 eq 'yes';
-		} elsif ($switch =~ /--with-(.+)?\=(.+)/) {
-			$name .= "_$1" if $2 ne 'no';
-		}
-	}
-	return $name;
-}
-
 #-----------------------------------------------#
 package ChaNGa::Build;
 BEGIN { $INC{"ChaNGa/Build.pm"} = $0; }

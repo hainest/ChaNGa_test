@@ -64,29 +64,31 @@ our @EXPORT_OK = qw(get_options);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 sub get_options {
-	my (%args) = @_;
+	my @names = @_;
 	my $all_opts = Charm::Build::Opts::get_opts();
 
-	my @opts;
-	for my $k (keys %args) {
-		die "Unknown Charm++ build option '$k'\n" unless exists $all_opts->{$k};
-		push @opts, $k if $args{$k};
+	# Ensure that provided option names exist
+	for my $n (@names) {
+		die "Unknown Charm++ build option '$n'\n" unless exists $all_opts->{$n};
 	}
 
-	if (@opts > 1) {
-		my $iter = ChaNGa::Util::combinations([map {[$_->switches]} @{$all_opts}{@opts}]);
+	my @switches = map {[$_->switches]} @{$all_opts}{@names};
+	
+	if (@switches > 1) {
+		my $iter = ChaNGa::Util::combinations(\@switches);
 		return $iter->combinations if wantarray;
 		return sub { $iter->get; };
-	}
-
-	my @switches;
-	if (@opts == 1) {
-		@switches = map {[$_]} $all_opts->{$opts[0]}->switches;
 	} else {
-		push @switches, [('')];
+		# Add a placeholder if no options were requested
+		if(@switches == 0) {
+			push @switches, [('')];
+		}
+		# Flatten into a simple list
+		@switches = map {ref $_ eq ref [] ? @{$_} : $_} @switches;
+				
+		return @switches if wantarray;
+		return sub { shift @switches; };
 	}
-	return @switches if wantarray;
-	return sub { shift @switches; };
 }
 
 #-----------------------------------------------#

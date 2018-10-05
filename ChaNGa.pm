@@ -91,6 +91,26 @@ sub get_options {
 	}
 }
 
+sub get_config {
+	my @opts = @_;
+	my @src_dirs = (@opts, 'default');
+
+	if (@opts > 1) {
+		my $iter = ChaNGa::Util::combinations(map {[$_, '']} @opts);
+		my @combos = $iter->combinations();
+		@src_dirs = map {join('-', grep {$_ ne ''} @$_)} @combos;
+	}
+	my @switches = get_options(@opts);
+	
+	die unless scalar @src_dirs == scalar @switches;
+
+	my %config = ();
+	for my $i (0..@src_dirs-1) {
+		$config{$src_dirs[$i] || 'default'} = $switches[$i];
+	}
+	return %config;
+}
+
 #-----------------------------------------------#
 package ChaNGa::Build::Opts;
 BEGIN { $INC{"ChaNGa/Build/Opts.pm"} = $0; }

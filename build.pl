@@ -78,21 +78,15 @@ sub build_charm {
 	return timediff(Benchmark->new(), $begin)->real;
 }
 sub build_changa($) {
-	my $opts = shift;
+	my ($charm_src, $dest, $opts) = @_;
 	print $fdLog "Building ChaNGa using '$opts -j$args{'njobs'}'... ";
-	if( -e "$args{'changa-dir'}/Makefile") {
-		execute("
-			cd $args{'changa-dir'}
-			make clean
-			rm -f Makefile.dep
-		");
-	}
+	make_path($dest);
+
 	my $begin = Benchmark->new();
 	my $res = execute("
-		cd $args{'changa-dir'}
-		export CHARM_DIR=\"$args{'charm-dir'}\"
+		cd $dest
+		export CHARM_DIR=\"$charm_src\"
 		./configure $opts
-		make depends
 		make -j$args{'njobs'}
 	");
 	if (!$res) {

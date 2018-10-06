@@ -12,6 +12,7 @@ use ChaNGa::Build qw(:all);
 use Cwd qw(cwd);
 use Pod::Usage;
 use Benchmark qw(timediff :hireswallclock);
+use Digest::MD5 qw(md5_base64);
 
 my %args = (
 	'prefix' 		=> cwd(),
@@ -78,8 +79,8 @@ sub build_charm {
 	return timediff(Benchmark->new(), $begin)->real;
 }
 sub build_changa {
-	my ($charm_src, $dest, $idx, $opts) = @_;
-	print $fdLog "$idx: Building ChaNGa using '$opts -j$args{'njobs'}'... ";
+	my ($charm_src, $dest, $opts) = @_;
+	print $fdLog "Building ChaNGa using '$opts -j$args{'njobs'}'... ";
 	make_path($dest);
 	
 	my $begin = Benchmark->new();
@@ -120,7 +121,6 @@ if ($args{'charm'}) {
 
 # Build all the versions of ChaNGa
 if ($args{'changa'}) {
-	my $i = 0;
 	for my $src_dir (keys %charm_config) {
 		my $dest = "$args{'build-dir'}/changa/$src_dir";
 		my $cur = $charm_config{$src_dir};
@@ -134,8 +134,10 @@ if ($args{'changa'}) {
 		while (my $changa = $changa_opts->()) {
 			push @{$changa}, "--with-cuda=$args{'cuda-dir'}" if $is_cuda;
 			push @{$changa}, "--enable-projections" if $is_proj;
-			my $dest = "$args{'build-dir'}/changa/$i";
-			build_changa("$args{'build-dir'}/charm/$src_dir", $dest, $i++, "@$changa");
+			my $id = md5_base64(localtime . "@$changa");
+			my $dest = "$args{'build-dir'}/changa/$id";
+			my $time = build_changa("$args{'build-dir'}/charm/$src_dir", $dest, "@$changa");
+			push @{$build_times{'changa'}}, $time;
 		}
 	}
 }

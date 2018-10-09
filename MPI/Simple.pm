@@ -13,21 +13,21 @@ bootstrap MPI::Simple;
 
 sub Send {
 	my $stor = nfreeze( \$_[0] );
-	_Send( $stor, $_[1], $_[2] );
+	mpi_simple_send( $stor, $_[1], $_[2] );
 }
 
 sub Recv {
 	my $out;
 	my ( $source, $tag, $status ) = @_;
-	$out = _Recv( $source, $tag, $status );
+	$out = mpi_simple_recv( $source, $tag, $status );
 	return ${ thaw($out) };
 }
 
 
-sub Init { _Init(); }
-sub Comm_size { _Comm_size(); }
-sub Comm_rank { _Comm_rank(); }
-sub Barrier { _Barrier(); }
-sub Finalize { _Finalize(); }
+sub Init { mpi_simple_init(); }
+sub Comm_size { mpi_simple_comm_size(); }
+sub Comm_rank { mpi_simple_comm_rank(); }
+sub Barrier { mpi_simple_barrier(); }
+sub Finalize { mpi_simple_finalize(); }
 
 1;

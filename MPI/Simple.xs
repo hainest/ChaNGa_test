@@ -9,7 +9,7 @@
  Finds length of data in stor_ref, sends this to receiver, then
  sends actual data, uses same tag for each message.
  */
-int _Send(SV* stor_ref, int dest, int tag) {
+int mpi_simple_send(SV* stor_ref, int dest, int tag) {
 	int str_len[1];
 	str_len[0] = sv_len(stor_ref);
 	MPI_Send(str_len, 1, MPI_INT, dest, tag, MPI_COMM_WORLD);
@@ -22,7 +22,7 @@ int _Send(SV* stor_ref, int dest, int tag) {
  Receives int for length of data it should then expect, allocates space
  then receives data into that space.  Creates a new SV and returns it.
  */
-SV* _Recv(int source, int tag, SV* status) {
+SV* mpi_simple_recv(int source, int tag, SV* status) {
 	MPI_Status tstatus;
 	SV* rval;
 	int len_buf[1];
@@ -40,7 +40,7 @@ SV* _Recv(int source, int tag, SV* status) {
 	return rval;
 }
 
-void _Init() {
+void mpi_simple_init() {
 	/* HACKY CRAP
 	 *
 	 * Reason it's needed: https://www.open-mpi.org/community/lists/users/2015/09/27608.php
@@ -53,20 +53,20 @@ void _Init() {
 	if (!flag)
 		MPI_Init(NULL, NULL);
 }
-int _Comm_rank() {
+int mpi_simple_comm_rank() {
 	int trank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &trank);
 	return trank;
 }
-int _Comm_size() {
+int mpi_simple_comm_size() {
 	int tsize;
 	MPI_Comm_size(MPI_COMM_WORLD, &tsize);
 	return tsize;
 }
-void _Barrier() {
+void mpi_simple_barrier() {
 	MPI_Barrier(MPI_COMM_WORLD);
 }
-void _Finalize() {
+void mpi_simple_finalize() {
 	MPI_Finalize();
 }
 
@@ -76,28 +76,28 @@ MODULE = MPI::Simple PACKAGE = MPI::Simple
 PROTOTYPES: DISABLE
 
 int
-_Send (stor_ref, dest, tag)
+mpi_simple_send (stor_ref, dest, tag)
 SV * stor_ref
 int dest
 int tag
 
 SV *
-_Recv (source, tag, status)
+mpi_simple_recv (source, tag, status)
 int source
 int tag
 SV * status
 
 void
-_Init ()
+mpi_simple_init ()
 
 int
-_Comm_rank ()
+mpi_simple_comm_rank ()
 
 int
-_Comm_size ()
+mpi_simple_comm_size ()
 
 void
-_Barrier ()
+mpi_simple_barrier ()
 
 void
-_Finalize ()
+mpi_simple_finalize ()

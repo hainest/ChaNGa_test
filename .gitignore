@@ -13,3 +13,10 @@ stuff.pl
 src/
 results/
 *.log
+
+MPI/MYMETA.json
+MPI/MYMETA.yml
+MPI/Makefile
+MPI/Simple.c
+MPI/blib/
+MPI/pm_to_blib

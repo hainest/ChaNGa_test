@@ -1,6 +1,8 @@
 use strict;
 use warnings;
-use lib 'MPI';
+use Cwd qw(cwd);
+use lib cwd() . '/..';
+use lib cwd() . '/../..';
 use MPI::Simple;
 
 MPI::Simple::Init();

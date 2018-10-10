@@ -8,3 +8,6 @@ all:
 clean:
 	cd MPI && make clean
 	rm -f MPI/Simple.so MPI/Makefile MPI/Makefile.old
+
+test:
+	cd MPI/t && mpiexec -np 2 perl test.pl

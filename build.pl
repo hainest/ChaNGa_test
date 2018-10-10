@@ -135,6 +135,7 @@ if ($args{'changa'}) {
 			push @{$changa}, "--with-cuda=$args{'cuda-dir'}" if $is_cuda;
 			push @{$changa}, "--enable-projections" if $is_proj;
 			my $id = md5_base64(localtime . "@$changa");
+			$id =~ s|/|_|g;
 			my $dest = "$args{'build-dir'}/changa/$id";
 			my $time = build_changa("$args{'build-dir'}/charm/$src_dir", $dest, "@$changa");
 			push @{$build_times{'changa'}}, $time;

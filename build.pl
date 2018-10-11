@@ -145,22 +145,11 @@ if ($args{'changa'}) {
 
 print $fdLog "End time: ", scalar localtime, "\n";
 
-sub mean {
-	use List::Util qw(sum);
-	return 0.0 if @{$_[0]} <= 0;
-	sum(@{$_[0]}) / @{$_[0]};
-}
-sub stddev {
-	use List::Util qw(sum);
-	my ($mean, $data) = @_;
-	return 0.0 if @$data <= 1; 
-	sqrt(sum(map {($_-$mean)**2.0} @$data) / (@$data - 1));
-}
-
 # Display build statistics
 print $fdLog "\n\n", '*'x10, " Build statistics ", '*'x10, "\n";
 for my $type (keys %build_times) {
 	print $fdLog "Built ", scalar @{$build_times{$type}}, " versions of $type.\n";
+	use ChaNGa::Util qw(mean stddev);
 	my $avg = mean($build_times{$type});
 	my $std = stddev($avg, $build_times{$type});
 	printf($fdLog "    time: %.3f +- %.3f seconds\n", $avg, $std);

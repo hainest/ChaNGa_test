@@ -4,7 +4,7 @@ package ChaNGa::Util;
 BEGIN { $INC{"ChaNGa/Util.pm"} = $0; }
 
 use base 'Exporter';
-our @EXPORT_OK = qw(execute any combinations);
+our @EXPORT_OK = qw(execute any combinations mean stddev);
 
 BEGIN {
     eval {
@@ -28,6 +28,18 @@ BEGIN {
 			}
 		}
     };
+}
+
+sub mean {
+	use List::Util qw(sum);
+	return 0.0 if @{$_[0]} <= 0;
+	sum(@{$_[0]}) / @{$_[0]};
+}
+sub stddev {
+	use List::Util qw(sum);
+	my ($mean, $data) = @_;
+	return 0.0 if @$data <= 1; 
+	sqrt(sum(map {($_-$mean)**2.0} @$data) / (@$data - 1));
 }
 
 sub combinations {

@@ -13,6 +13,7 @@ use Cwd qw(cwd);
 use Pod::Usage;
 use Benchmark qw(timediff :hireswallclock);
 use Digest::MD5 qw(md5_base64);
+use Try::Tiny;
 
 my %args = (
 	'prefix' 		=> cwd(),
@@ -72,10 +73,9 @@ sub build_charm {
 	");
 	if (!$res) {
 		print $fdLog "FAILED\n";
-		exit if $args{'fatal-errors'};
-	} else {
-		print $fdLog "OK\n";
+		die if $args{'fatal-errors'};
 	}
+	print $fdLog "OK\n";
 	return timediff(Benchmark->new(), $begin)->real;
 }
 sub build_changa {
@@ -91,11 +91,9 @@ sub build_changa {
 		make -j$args{'njobs'}
 	");
 	if (!$res) {
-		print $fdLog "FAILED\n";
-		exit if $args{'fatal-errors'};
-	} else {
-		print $fdLog "OK\n";
+		print $fdLog "FAILED\n" and die;
 	}
+	print $fdLog "OK\n";
 	return timediff(Benchmark->new(), $begin)->real;
 }
 
@@ -106,7 +104,11 @@ sub do_charm_build {
 		my $dest = "$args{'build-dir'}/charm/$src_dir";
 		my $cur = $config->{$src_dir};
 		my $switches = (ref $cur eq ref []) ? join(' ', @{$cur}) : $cur;
-		push @build_times, build_charm($fdLog, $dest, $switches);
+		try {
+			push @build_times, build_charm($fdLog, $dest, $switches);
+		} catch {
+			die if $args{'fatal-errors'};
+		}
 	}
 	return @build_times;
 }
@@ -130,8 +132,12 @@ sub do_changa_build {
 			my $id = md5_base64(localtime . "@$changa");
 			$id =~ s|/|_|g;
 			my $dest = "$args{'build-dir'}/changa/$id";
-			my $time = build_changa($fdLog, "$args{'build-dir'}/charm/$src_dir", $dest, "@$changa");
-			push @build_times, $time;
+			try {
+				my $time = build_changa($fdLog, "$args{'build-dir'}/charm/$src_dir", $dest, "@$changa");
+				push @build_times, $time;
+			} catch {
+				die if $args{'fatal-errors'};
+			}
 		}
 	}
 	return @build_times;

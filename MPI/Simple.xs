@@ -40,6 +40,10 @@ SV* mpi_simple_recv(int source, int tag, SV* status) {
 	return rval;
 }
 
+SV* mpi_simple_recv_any(int tag, SV* status) {
+	return mpi_simple_recv(MPI_ANY_SOURCE, tag, status);
+}
+
 void mpi_simple_init() {
 	/* HACKY CRAP
 	 *
@@ -89,6 +93,11 @@ mpi_simple_recv (source, tag, status)
 int source
 int tag
 SV * status
+
+SV*
+mpi_simple_recv_any (tag, status)
+int tag
+SV* status
 
 void
 mpi_simple_init ()

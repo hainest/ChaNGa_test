@@ -99,31 +99,24 @@ sub build_changa {
 	return timediff(Benchmark->new(), $begin)->real;
 }
 
-print $fdLog "Start time: ", scalar localtime, "\n";
-
-my @charm_opts = grep {$args{$_} == 1} keys %{Charm::Build::Opts::get_opts()};
-my %charm_config = Charm::Build::get_config(@charm_opts);
-
-my %build_times = (
-	'charm' => [],
-	'changa' => []
-);
-
-# Build all the versions of Charm++
-if ($args{'charm'}) {
-	for my $src_dir (keys %charm_config) {
+sub do_charm_build {
+	my $config = shift;
+	my @build_times;
+	for my $src_dir (keys %{$config}) {
 		my $dest = "$args{'build-dir'}/charm/$src_dir";
-		my $cur = $charm_config{$src_dir};
+		my $cur = $config->{$src_dir};
 		my $switches = (ref $cur eq ref []) ? join(' ', @{$cur}) : $cur;
-		push @{$build_times{'charm'}}, build_charm($fdLog, $dest, $switches);
+		push @build_times, build_charm($fdLog, $dest, $switches);
 	}
+	return @build_times;
 }
 
-# Build all the versions of ChaNGa
-if ($args{'changa'}) {
-	for my $src_dir (keys %charm_config) {
+sub do_changa_build {
+	my $config = shift;
+	my @build_times;
+	for my $src_dir (keys %{$config}) {
 		my $dest = "$args{'build-dir'}/changa/$src_dir";
-		my $cur = $charm_config{$src_dir};
+		my $cur = $config->{$src_dir};
 		my $switches = (ref $cur eq ref []) ? join(' ', @{$cur}) : $cur;
 	
 		my $is_cuda = $src_dir =~ /cuda/;
@@ -138,9 +131,30 @@ if ($args{'changa'}) {
 			$id =~ s|/|_|g;
 			my $dest = "$args{'build-dir'}/changa/$id";
 			my $time = build_changa($fdLog, "$args{'build-dir'}/charm/$src_dir", $dest, "@$changa");
-			push @{$build_times{'changa'}}, $time;
+			push @build_times, $time;
 		}
 	}
+	return @build_times;
+}
+
+print $fdLog "Start time: ", scalar localtime, "\n";
+
+my @charm_opts = grep {$args{$_} == 1} keys %{Charm::Build::Opts::get_opts()};
+my %charm_config = Charm::Build::get_config(@charm_opts);
+
+my %build_times = (
+	'charm' => [],
+	'changa' => []
+);
+
+# Build all the versions of Charm++
+if ($args{'charm'}) {
+	@{$build_times{'charm'}} = do_charm_build(\%charm_config);
+}
+
+# Build all the versions of ChaNGa
+if ($args{'changa'}) {
+	@{$build_times{'changa'}} = do_changa_build(\%charm_config);
 }
 
 print $fdLog "End time: ", scalar localtime, "\n";

@@ -137,6 +137,30 @@ sub do_changa_build {
 	return @build_times;
 }
 
+sub display_stats {
+	my ($fdLog, $build_times) = @_;
+
+	# Display build statistics in log file
+	print $fdLog "\n\n", '*'x10, " Build statistics ", '*'x10, "\n";
+	for my $type (keys %{$build_times}) {
+		print $fdLog "Built ", scalar @{$build_times->{$type}}, " versions of $type.\n";
+		use ChaNGa::Util qw(mean stddev);
+		my $avg = mean($build_times->{$type});
+		my $std = stddev($avg, $build_times->{$type});
+		printf($fdLog "    time: %.3f +- %.3f seconds\n", $avg, $std);
+	}
+	
+	# Save individual timings to a separate file
+	my $build_file = 'build.timings';
+	move($build_file, "$build_file.bak") if -e $build_file;
+	open my $fdOut, '>', $build_file or die "Unable to open $build_file: $!\n";
+	for my $type (keys %{$build_times}) {
+		print $fdOut "$type: ", join(',', @{$build_times->{$type}}), "\n";
+	}
+}
+
+#----------------------------------------------------------------------------------------
+
 print $fdLog "Start time: ", scalar localtime, "\n";
 
 my @charm_opts = grep {$args{$_} == 1} keys %{Charm::Build::Opts::get_opts()};
@@ -159,25 +183,7 @@ if ($args{'changa'}) {
 
 print $fdLog "End time: ", scalar localtime, "\n";
 
-# Display build statistics
-print $fdLog "\n\n", '*'x10, " Build statistics ", '*'x10, "\n";
-for my $type (keys %build_times) {
-	print $fdLog "Built ", scalar @{$build_times{$type}}, " versions of $type.\n";
-	use ChaNGa::Util qw(mean stddev);
-	my $avg = mean($build_times{$type});
-	my $std = stddev($avg, $build_times{$type});
-	printf($fdLog "    time: %.3f +- %.3f seconds\n", $avg, $std);
-}
-
-{
-	my $build_file = 'build.timings';
-	move($build_file, "$build_file.bak") if -e $build_file;
-	open my $fdOut, '>', $build_file or die;
-	for my $type (keys %build_times) {
-		print $fdOut "$type: ", join(',', @{$build_times{$type}}), "\n";
-	}
-}
-
+display_stats($fdLog, \%build_times);
 
 __END__
 

@@ -98,7 +98,7 @@ sub build_changa {
 }
 
 sub do_charm_build {
-	my $config = shift;
+	my ($fdLog, $config) = @_;
 	my @build_times;
 	for my $src_dir (keys %{$config}) {
 		my $dest = "$args{'build-dir'}/charm/$src_dir";
@@ -114,7 +114,7 @@ sub do_charm_build {
 }
 
 sub do_changa_build {
-	my $config = shift;
+	my ($fdLog, $config) = @_;
 	my @build_times;
 	for my $src_dir (keys %{$config}) {
 		my $dest = "$args{'build-dir'}/changa/$src_dir";
@@ -165,9 +165,15 @@ sub display_stats {
 	}
 }
 
+sub print_log {
+	print $fdLog $_[0], "\n";
+}
+
 #----------------------------------------------------------------------------------------
 
-print $fdLog "Start time: ", scalar localtime, "\n";
+my $log_string;
+open my $log, '>', \$log_string;
+print $log "Start time: ", scalar localtime, "\n";
 
 my @charm_opts = grep {$args{$_} == 1} keys %{Charm::Build::Opts::get_opts()};
 my %charm_config = Charm::Build::get_config(@charm_opts);
@@ -179,17 +185,27 @@ my %build_times = (
 
 # Build all the versions of Charm++
 if ($args{'charm'}) {
-	@{$build_times{'charm'}} = do_charm_build(\%charm_config);
+	try {
+		@{$build_times{'charm'}} = do_charm_build($log, \%charm_config);
+	} catch {
+		print_log($log_string) and die;
+	}
 }
 
 # Build all the versions of ChaNGa
 if ($args{'changa'}) {
-	@{$build_times{'changa'}} = do_changa_build(\%charm_config);
+	try {
+		@{$build_times{'changa'}} = do_changa_build($log, \%charm_config);
+	} catch {
+		print_log($log_string) and die;
+	}
 }
 
-print $fdLog "End time: ", scalar localtime, "\n";
+print $log "End time: ", scalar localtime, "\n";
 
-display_stats($fdLog, \%build_times);
+display_stats($log, \%build_times);
+
+print_log($log_string);
 
 __END__
 

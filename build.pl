@@ -58,7 +58,7 @@ open my $fdLog, '>', $args{'log-file'} or die "Unable to open $args{'log-file'}:
 make_path($args{'build-dir'});
 
 sub build_charm {
-	my ($dest, $opts) = @_;
+	my ($fdLog, $dest, $opts) = @_;
 	print $fdLog "Building charm++ using '$opts'... ";
 	make_path($dest);
 	
@@ -79,7 +79,7 @@ sub build_charm {
 	return timediff(Benchmark->new(), $begin)->real;
 }
 sub build_changa {
-	my ($charm_src, $dest, $opts) = @_;
+	my ($fdLog, $charm_src, $dest, $opts) = @_;
 	print $fdLog "Building ChaNGa using '$opts -j$args{'njobs'}'... ";
 	make_path($dest);
 	
@@ -115,7 +115,7 @@ if ($args{'charm'}) {
 		my $dest = "$args{'build-dir'}/charm/$src_dir";
 		my $cur = $charm_config{$src_dir};
 		my $switches = (ref $cur eq ref []) ? join(' ', @{$cur}) : $cur;
-		push @{$build_times{'charm'}}, build_charm($dest, $switches);
+		push @{$build_times{'charm'}}, build_charm($fdLog, $dest, $switches);
 	}
 }
 
@@ -137,7 +137,7 @@ if ($args{'changa'}) {
 			my $id = md5_base64(localtime . "@$changa");
 			$id =~ s|/|_|g;
 			my $dest = "$args{'build-dir'}/changa/$id";
-			my $time = build_changa("$args{'build-dir'}/charm/$src_dir", $dest, "@$changa");
+			my $time = build_changa($fdLog, "$args{'build-dir'}/charm/$src_dir", $dest, "@$changa");
 			push @{$build_times{'changa'}}, $time;
 		}
 	}

@@ -67,7 +67,10 @@ void mpi_simple_barrier() {
 	MPI_Barrier(MPI_COMM_WORLD);
 }
 void mpi_simple_finalize() {
-	MPI_Finalize();
+	int flag = 0;
+	MPI_Initialized(&flag);
+	if(flag)
+		MPI_Finalize();
 }
 
 

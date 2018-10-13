@@ -31,9 +31,3 @@ comma-separated list of configure targets to build. For example,
 	build.pl --build-type=hexadecapole,float
 	
 will test the HEXADECAPOLE and COSMO_FLOAT options (note: CUDA is still enabled here; to disable, use `--no-cuda`). 
-
----
-
-Builds are very chatty. I recommend using
-
-	perl build.pl 1>/dev/null 2>build.err

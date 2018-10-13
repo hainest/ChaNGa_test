@@ -69,7 +69,8 @@ sub build_charm {
 		export CUDA_DIR=$args{'cuda-dir'}
 
 		cd $dest
-		$args{'charm-dir'}/build ChaNGa $args{'charm-target'} $args{'charm-options'} $opts --with-production --enable-lbuserdata -j$args{'njobs'}
+		$args{'charm-dir'}/build ChaNGa $args{'charm-target'} $args{'charm-options'} $opts \\
+		--with-production --enable-lbuserdata -j$args{'njobs'} 1>build.out 2>build.err
 	");
 	if (!$res) {
 		print $fdLog "FAILED\n";
@@ -87,8 +88,8 @@ sub build_changa {
 	my $res = execute("
 		cd $dest
 		export CHARM_DIR=\"$charm_src\"
-		$args{'changa-dir'}/configure $opts
-		make -j$args{'njobs'}
+		$args{'changa-dir'}/configure $opts 1>config.out 2>config.err
+		make -j$args{'njobs'} 1>build.out 2>build.err
 	");
 	if (!$res) {
 		print $fdLog "FAILED\n" and die;

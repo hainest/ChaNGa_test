@@ -62,7 +62,7 @@ sub build_charm {
 	my ($fdLog, $dest, $opts) = @_;
 	print $fdLog "Building charm++ using '$opts'... ";
 	make_path($dest);
-	
+
 	my $begin = Benchmark->new();
 	my $res = execute("
 		cd $dest
@@ -83,7 +83,7 @@ sub build_changa {
 	my ($fdLog, $charm_src, $dest, $opts) = @_;
 	print $fdLog "Building ChaNGa using '$opts -j$args{'njobs'}'... ";
 	make_path($dest);
-	
+
 	my $begin = Benchmark->new();
 	my $res = execute("
 		cd $dest
@@ -121,11 +121,11 @@ sub do_changa_build {
 		my $dest = "$args{'build-dir'}/changa/$src_dir";
 		my $cur = $config->{$src_dir};
 		my $switches = (ref $cur eq ref []) ? join(' ', @{$cur}) : $cur;
-	
+
 		my $is_cuda = $src_dir =~ /cuda/;
 		my $is_smp  = $src_dir =~ /smp/;
 		my $is_proj = $src_dir =~ /projections/;
-	
+
 		my $changa_opts = ChaNGa::Build::get_options($args{'build-type'});
 		while (my $changa = $changa_opts->()) {
 			push @{$changa}, "--with-cuda=$args{'cuda-dir'}" if $is_cuda;
@@ -156,7 +156,7 @@ sub display_stats {
 		my $std = stddev($avg, $build_times->{$type});
 		printf($fdLog "    time: %.3f +- %.3f seconds\n", $avg, $std);
 	}
-	
+
 	# Save individual timings to a separate file
 	my $build_file = 'build.timings';
 	move($build_file, "$build_file.bak") if -e $build_file;
@@ -213,7 +213,7 @@ __END__
 =head1 DESCRIPTION
 
 A tool for automating building Charm++ and ChaNGa
- 
+
 =head1 SYNOPSIS
 
 build [options]
@@ -243,7 +243,7 @@ In addition to the predefined build types (default, basic, force-test, and relea
 comma-separated list of configure targets to build. For example,
 
 	build.pl --build-type=hexadecapole,float
-	
-will test the HEXADECAPOLE and COSMO_FLOAT options (note: CUDA is still enabled here; to disable, use --no-cuda). 
+
+will test the HEXADECAPOLE and COSMO_FLOAT options (note: CUDA is still enabled here; to disable, use --no-cuda).
 
 =cut

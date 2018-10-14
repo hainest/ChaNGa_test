@@ -34,5 +34,7 @@ sub Comm_size { mpi_simple_comm_size(); }
 sub Comm_rank { mpi_simple_comm_rank(); }
 sub Barrier { mpi_simple_barrier(); }
 sub Finalize { mpi_simple_finalize(); }
+sub Die { Finalize(); die; }
+sub Die_sync { Barrier(); Die(); }
 
 1;

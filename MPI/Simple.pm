@@ -12,8 +12,9 @@ $VERSION = '0.03';
 bootstrap MPI::Simple;
 
 sub Send {
-	my $stor = nfreeze( \$_[0] );
-	mpi_simple_send( $stor, $_[1], $_[2] );
+	my ($data, $dest, $tag) = @_;
+	my $stor = nfreeze(\$data);
+	mpi_simple_send($stor, $dest, $tag);
 }
 
 sub Recv {

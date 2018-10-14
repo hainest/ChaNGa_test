@@ -19,13 +19,14 @@ sub Send {
 
 sub Recv {
 	my $out;
-	my ( $source, $tag, $status ) = @_;
+	my ($source, $tag, $status) = @_;
+	my $ret;
 	if ($source eq 'any') {
-		$out = mpi_simple_recv_any($tag, $status);
+		$out = mpi_simple_recv_any($tag, $ret);
 	} else {
-		$out = mpi_simple_recv($source, $tag, $status);
+		$out = mpi_simple_recv($source, $tag, $ret);
 	}
-	
+	$$status = $ret if $status;
 	return ${ thaw($out) };
 }
 

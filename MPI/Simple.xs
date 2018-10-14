@@ -9,13 +9,10 @@
  Finds length of data in stor_ref, sends this to receiver, then
  sends actual data, uses same tag for each message.
  */
-int mpi_simple_send(SV* stor_ref, int dest, int tag) {
-	int str_len[1];
-	str_len[0] = sv_len(stor_ref);
-	MPI_Send(str_len, 1, MPI_INT, dest, tag, MPI_COMM_WORLD);
-	MPI_Send(SvPVX(stor_ref), sv_len(stor_ref), MPI_CHAR, dest, tag,
-	MPI_COMM_WORLD);
-	return 0;
+void mpi_simple_send(SV* stor_ref, int dest, int tag) {
+	int str_len = sv_len(stor_ref);
+	MPI_Send(&str_len, 1, MPI_INT, dest, tag, MPI_COMM_WORLD);
+	MPI_Send(SvPVX(stor_ref), sv_len(stor_ref), MPI_CHAR, dest, tag, MPI_COMM_WORLD);
 }
 
 /*
@@ -24,17 +21,12 @@ int mpi_simple_send(SV* stor_ref, int dest, int tag) {
  */
 SV* mpi_simple_recv(int source, int tag, SV* status) {
 	MPI_Status tstatus;
-	SV* rval;
-	int len_buf[1];
-	char *recv_buf;
+	int len;
 
-	MPI_Recv(len_buf, 1, MPI_INT, source, tag, MPI_COMM_WORLD, &tstatus);
-	recv_buf = (char*) malloc((len_buf[0] + 1) * sizeof(char));
-	if (recv_buf == NULL)
-		croak("Allocation error in _Recv");
-	MPI_Recv(recv_buf, len_buf[0], MPI_CHAR, source, tag, MPI_COMM_WORLD,
-			&tstatus);
-	rval = newSVpvn(recv_buf, len_buf[0]);
+	MPI_Recv(&len, 1, MPI_INT, source, tag, MPI_COMM_WORLD, &tstatus);
+	char *recv_buf = (char*)malloc((len + 1) * sizeof(char));
+	MPI_Recv(recv_buf, len, MPI_CHAR, source, tag, MPI_COMM_WORLD, &tstatus);
+	SV* rval = newSVpvn(recv_buf, len);
 	sv_setiv(status, tstatus.MPI_SOURCE);
 	free(recv_buf);
 	return rval;
@@ -82,7 +74,7 @@ MODULE = MPI::Simple PACKAGE = MPI::Simple
 
 PROTOTYPES: DISABLE
 
-int
+void
 mpi_simple_send (stor_ref, dest, tag)
 SV * stor_ref
 int dest

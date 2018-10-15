@@ -37,8 +37,7 @@ GetOptions(\%args,
 	'prefix=s', 'charm-dir=s', 'changa-dir=s', 'log-file=s',
 	'build-dir=s', 'charm-target=s', 'charm-options=s',
 	'cuda-dir=s', 'build-type=s', 'cuda!', 'smp!',
-	'projections!', 'njobs=i',
-	'save-binaries!', 'charm!', 'changa!', 'help'
+	'projections!', 'njobs=i', 'charm!', 'changa!', 'help'
 ) or pod2usage(2);
 pod2usage( -exitval => 0, -verbose => 99 ) if $args{'help'};
 

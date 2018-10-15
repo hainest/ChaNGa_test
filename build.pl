@@ -71,7 +71,7 @@ sub build_charm {
 		--with-production --enable-lbuserdata -j$args{'njobs'} 1>build.out 2>build.err
 	");
 	if (!$res) {
-		print $fdLog "FAILED\n";
+		print $fdLog "FAILED\n" and die;
 	}
 	print $fdLog "OK\n";
 	return timediff(Benchmark->new(), $begin)->real;

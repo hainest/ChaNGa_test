@@ -20,11 +20,22 @@ else {
 		$msg->{'name'} eq 'moo' &&
 		$sender == 1
 	) {
-		print "PASSED\n";
+		print "test1: PASSED\n";
 	} else {
-		print "FAILED\n";
+		print "test1: FAILED\n";
 		use Data::Dumper;
 		print Dumper($msg), "\nsender = $sender\n";
+	}
+}
+
+my $error = $rank == 0;
+$error = MPI::Simple::Error($error);
+
+if($rank == 1) {
+	if($error == 1) {
+		print "test2: PASSED\n";
+	} else {
+		print "test2: FAILED\n";
 	}
 }
 MPI::Simple::Finalize();

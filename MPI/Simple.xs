@@ -69,6 +69,12 @@ void mpi_simple_finalize() {
 		MPI_Finalize();
 }
 
+int mpi_simple_error(int error) {
+	int global_error = 0;
+	MPI_Allreduce(&error, &global_error, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+	return global_error > 0;
+}
+
 
 MODULE = MPI::Simple PACKAGE = MPI::Simple
 
@@ -105,3 +111,7 @@ mpi_simple_barrier ()
 
 void
 mpi_simple_finalize ()
+
+int
+mpi_simple_error (error)
+int error

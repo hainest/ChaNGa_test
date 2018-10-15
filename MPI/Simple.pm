@@ -38,5 +38,6 @@ sub Barrier { mpi_simple_barrier(); }
 sub Finalize { mpi_simple_finalize(); }
 sub Die { Finalize(); die; }
 sub Die_sync { Barrier(); Die(); }
+sub Error { mpi_simple_error($_[0]); }
 
 1;

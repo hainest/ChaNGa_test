@@ -29,7 +29,6 @@ my %args = (
 	'smp'			=> 0,
 	'projections'   => 0,
 	'njobs' 		=> 2,
-	'fatal-errors'	=> 0,
 	'charm'			=> 1,
 	'changa'		=> 1,
 	'help' 			=> 0
@@ -38,7 +37,7 @@ GetOptions(\%args,
 	'prefix=s', 'charm-dir=s', 'changa-dir=s', 'log-file=s',
 	'build-dir=s', 'charm-target=s', 'charm-options=s',
 	'cuda-dir=s', 'build-type=s', 'cuda!', 'smp!',
-	'projections!', 'njobs=i', 'fatal-errors!',
+	'projections!', 'njobs=i',
 	'save-binaries!', 'charm!', 'changa!', 'help'
 ) or pod2usage(2);
 pod2usage( -exitval => 0, -verbose => 99 ) if $args{'help'};
@@ -74,7 +73,6 @@ sub build_charm {
 	");
 	if (!$res) {
 		print $fdLog "FAILED\n";
-		die if $args{'fatal-errors'};
 	}
 	print $fdLog "OK\n";
 	return timediff(Benchmark->new(), $begin)->real;
@@ -105,11 +103,7 @@ sub do_charm_build {
 		my $dest = "$args{'build-dir'}/charm/$src_dir";
 		my $cur = $config->{$src_dir};
 		my $switches = (ref $cur eq ref []) ? join(' ', @{$cur}) : $cur;
-		try {
-			push @build_times, build_charm($fdLog, $dest, $switches);
-		} catch {
-			die if $args{'fatal-errors'};
-		}
+		push @build_times, build_charm($fdLog, $dest, $switches);
 	}
 	return @build_times;
 }
@@ -133,12 +127,8 @@ sub do_changa_build {
 			my $id = md5_base64(localtime . "@$changa");
 			$id =~ s|/|_|g;
 			my $dest = "$args{'build-dir'}/changa/$id";
-			try {
-				my $time = build_changa($fdLog, "$args{'build-dir'}/charm/$src_dir", $dest, "@$changa");
-				push @build_times, $time;
-			} catch {
-				die if $args{'fatal-errors'};
-			}
+			my $time = build_changa($fdLog, "$args{'build-dir'}/charm/$src_dir", $dest, "@$changa");
+			push @build_times, $time;
 		}
 	}
 	return @build_times;
@@ -232,7 +222,6 @@ build [options]
    --[no-]smp           Enable SMP tests (default: no)
    --[no-]projections   Enable Projections tests (default: no)
    --njobs=N            Number of make jobs (default: N=2)
-   --[no-]fatal-errors  Kill build sequence on any error (default: no; errors are reported only)
    --[no-]charm         Build the Charm++ libraries for ChaNGa (default: yes)
    --[no-]changa        Build ChaNGa (default: yes)
    --help               Print this help message

@@ -120,7 +120,7 @@ sub get_config {
 	for my $i (0..@src_dirs-1) {
 		$config{$src_dirs[$i] || 'default'} = $switches[$i];
 	}
-	return %config;
+	return \%config;
 }
 
 #-----------------------------------------------#

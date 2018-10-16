@@ -234,8 +234,11 @@ if ($args{'changa'}) {
 	
 	# Do the builds
 	for my $c (@{$changa_config}) {
-		my ($charm_src, $id, $opts) = @{$c}{'charm_src','id','opts'};
-		my $dest = "$args{'build-dir'}/changa/$id";
+		my ($charm_src, $opts) = @{$c}{'charm_src','opts'};
+		
+		use Digest::MD5 qw(md5_base64);
+		my $id = md5_base64(localtime . "@$opts");
+		$id =~ s|/|_|g;
 		
 		try {
 			my $time = build_changa($log, "$args{'build-dir'}/charm/$charm_src", $id, "@$opts");

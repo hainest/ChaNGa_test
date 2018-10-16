@@ -214,12 +214,7 @@ sub get_config {
 		for my $s (@switches) {
 			push @{$s}, "--with-cuda=$cuda_dir" if $is_cuda;
 			push @{$s}, "--enable-projections" if $is_proj;
-			
-			use Digest::MD5 qw(md5_base64);
-			my $id = md5_base64(localtime . "@$s");
-			$id =~ s|/|_|g;
-			
-			push @config, {'charm_src'=>$charm_type, 'id'=>$id, 'opts'=>$s};
+			push @config, {'charm_src'=>$charm_type, 'opts'=>$s};
 		}
 	}
 	return \@config;

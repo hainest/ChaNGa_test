@@ -160,7 +160,7 @@ our @EXPORT_OK = qw(get_options);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 sub get_options {
-	my ($type, %args) = @_;
+	my ($type, $is_cuda) = @_;
 	my @names;
 
 	if ($type eq 'basic') {

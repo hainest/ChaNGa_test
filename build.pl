@@ -10,8 +10,14 @@ use ChaNGa::Util qw(execute any);
 use ChaNGa::Build qw(:all);
 use Pod::Usage;
 use Benchmark qw(timediff :hireswallclock);
-use Digest::MD5 qw(md5_base64);
 use Try::Tiny;
+use lib cwd().'/MPI';
+use MPI::Simple;
+
+# Set up MPI
+MPI::Simple::Init();
+my $mpi_rank = MPI::Simple::Comm_rank();
+my $mpi_size = MPI::Simple::Comm_size();
 
 my %args = (
 	'prefix' 		=> cwd(),
@@ -31,28 +37,45 @@ my %args = (
 	'changa'		=> 1,
 	'help' 			=> 0
 );
-GetOptions(\%args,
-	'prefix=s', 'charm-dir=s', 'changa-dir=s', 'log-file=s',
-	'build-dir=s', 'charm-target=s', 'charm-options=s',
-	'cuda-dir=s', 'build-type=s', 'cuda!', 'smp!',
-	'projections!', 'njobs=i', 'charm!', 'changa!', 'help'
-) or pod2usage(2);
-pod2usage( -exitval => 0, -verbose => 99 ) if $args{'help'};
 
+{
+	my $res = GetOptions(\%args,
+		'prefix=s', 'charm-dir=s', 'changa-dir=s', 'log-file=s',
+		'build-dir=s', 'charm-target=s', 'charm-options=s',
+		'cuda-dir=s', 'build-type=s', 'cuda!', 'smp!',
+		'projections!', 'njobs=i', 'charm!', 'changa!', 'help'
+	);
+	
+	if(!$res) {
+		pod2usage(2) if $mpi_rank == 0;
+		MPI::Simple::Die_sync();
+	}
+}
+
+if($args{'help'}) {
+	pod2usage(-exitval => 0, -verbose => 99) if $mpi_rank == 0;
+	MPI::Simple::Die_sync();
+}
+
+# Sanity check
+if(!$args{'charm'} && !$args{'changa'}) {
+	print STDERR "Must build at least one configuration\n" if $mpi_rank == 0;
+	MPI::Simple::Die_sync();
+}
+
+# Default directory and file locations
 $args{'changa-dir'} //= "$args{'prefix'}/changa";
 $args{'charm-dir'} //= "$args{'prefix'}/charm";
 $args{'build-dir'} //= "$args{'prefix'}/build";
 $args{'log-file'} //= "$args{'prefix'}/build.log";
 
-# Sanity check
-die "Must build at least one configuration\n" if !$args{'charm'} && !$args{'changa'};
+if ($mpi_rank == 0) {
+	# Save a backup, if the log file already exists
+	move($args{'log-file'}, "$args{'log-file'}.bak") if -e $args{'log-file'};
 
-# Save a backup if the log file already exists
-move($args{'log-file'}, "$args{'log-file'}.bak") if -e $args{'log-file'};
-open my $fdLog, '>', $args{'log-file'} or die "Unable to open $args{'log-file'}: $!\n";
-
-# Create the build directory
-make_path($args{'build-dir'});
+	# Create the build directory
+	make_path($args{'build-dir'});
+}
 
 sub build_charm {
 	my ($fdLog, $dest, $opts) = @_;
@@ -92,55 +115,162 @@ sub build_changa {
 	print $fdLog "OK\n";
 	return timediff(Benchmark->new(), $begin)->real;
 }
+sub write_log {
+	my $data = shift;
+	
+	if($mpi_rank == 0) {
+		my %logs = (
+			'0' => $data
+		);
+		
+		my $sender = 0;
+		while(scalar keys %logs != $mpi_size) {
+			my $log = MPI::Simple::Recv('any', 0, \$sender);
+			$logs{$sender} = $log;
+		}
+		
+		open my $fdLog, '>>', $args{'log-file'};
+		for my $id (sort keys %logs) {
+			print $fdLog $logs{$id};
+		}
+	} else {
+		MPI::Simple::Send($data, 0, 0);
+	}
+}
+#----------------------------------------------------------------------------------------
 
-sub do_charm_build {
-	my ($fdLog, $config) = @_;
-	my @build_times;
+my $log_string;
+open my $log, '>', \$log_string;
+
+my %build_times = ('charm'=>[],'changa'=>[]);
+
+if($args{'charm'}) {
+	my $config;
+	if($mpi_rank == 0) {
+		my @charm_opts = grep {$args{$_} == 1} keys %{Charm::Build::Opts::get_opts()};
+		$config = Charm::Build::get_config(@charm_opts);
+		
+		if($mpi_size > 1) {
+			# Assign configurations to each rank in a round-robin fashion
+			my @all_configs = %{$config};
+			my @configs_per_rank = ((undef) x $mpi_size);
+			my $cur_id = 0;
+			while(my @cur = splice(@all_configs, 0, 2)) {
+				push @{$configs_per_rank[$cur_id]}, @cur;
+				$cur_id = ++$cur_id % $mpi_size;
+			}
+			
+			# Rank 0 gets nothing if there are fewer configurations
+			# than MPI ranks. Otherwise, it gets the last one
+			# so that that it doesn't get the possible extra config.
+			# This guarantees it does either no work or the same amount of work
+			# as the other ranks, but never does the maximum amount of work.
+			my $tmp = pop @configs_per_rank;
+			$config = $tmp ? {@{$tmp}} : {};
+			
+			$cur_id = 1;
+			for my $c (@configs_per_rank) {
+				MPI::Simple::Send($c ? {@{$c}} : {}, $cur_id++, 0);
+			}
+		}
+	} else {
+		$config = MPI::Simple::Recv(0, 0);
+	}
+
+	# Do the builds
+	my $error = 0;
 	for my $src_dir (keys %{$config}) {
 		my $dest = "$args{'build-dir'}/charm/$src_dir";
 		my $cur = $config->{$src_dir};
 		my $switches = (ref $cur eq ref []) ? join(' ', @{$cur}) : $cur;
-		push @build_times, build_charm($fdLog, $dest, $switches);
+		try {
+			push @{$build_times{'charm'}}, build_charm($log, $dest, $switches);
+		} catch {
+			$error = 1;
+		};
 	}
-	return @build_times;
+	
+	MPI::Simple::Barrier();
+	write_log($log_string);
+
+	# If any rank had an error, we can't continue
+	MPI::Simple::Die_sync() if MPI::Simple::Error($error);
 }
 
-sub do_changa_build {
-	my ($fdLog, $config) = @_;
-	my @build_times;
-	for my $src_dir (keys %{$config}) {
-		my $dest = "$args{'build-dir'}/changa/$src_dir";
-		my $cur = $config->{$src_dir};
-		my $switches = (ref $cur eq ref []) ? join(' ', @{$cur}) : $cur;
+if ($args{'changa'}) {
+	my $changa_config;
+	if($mpi_rank == 0) {
+		my @charm_opts = grep {$args{$_} == 1} keys %{Charm::Build::Opts::get_opts()};
+		my $charm_config = Charm::Build::get_config(@charm_opts);
+		$changa_config = ChaNGa::Build::get_config($args{'build-type'}, $charm_config, $args{'cuda-dir'});
+		my @configs_per_rank = ((undef) x $mpi_size);
 
-		my $is_cuda = $src_dir =~ /cuda/;
-		my $is_smp  = $src_dir =~ /smp/;
-		my $is_proj = $src_dir =~ /projections/;
-
-		my $changa_opts = ChaNGa::Build::get_options($args{'build-type'});
-		while (my $changa = $changa_opts->()) {
-			push @{$changa}, "--with-cuda=$args{'cuda-dir'}" if $is_cuda;
-			push @{$changa}, "--enable-projections" if $is_proj;
-			my $id = md5_base64(localtime . "@$changa");
-			$id =~ s|/|_|g;
-			my $dest = "$args{'build-dir'}/changa/$id";
-			my $time = build_changa($fdLog, "$args{'build-dir'}/charm/$src_dir", $dest, "@$changa");
-			push @build_times, $time;
+		if($mpi_size > 1) {
+			# Assign configurations to each rank in a round-robin fashion
+			my $rank = 0;
+			for my $c (@{$changa_config}) {
+				push @{$configs_per_rank[$rank]}, $c;
+				$rank = ++$rank % $mpi_size;
+			}
+			
+			# Rank 0 gets nothing if there are fewer configurations
+			# than MPI ranks. Otherwise, it gets the last one
+			# so that that it doesn't get the possible extra config.
+			# This guarantees it does either no work or the same amount of work
+			# as the other ranks, but never does the maximum amount of work.
+			my $tmp = pop @configs_per_rank;
+			$changa_config = $tmp || [];
+			
+			$rank = 1;
+			for my $c (@configs_per_rank) {
+				MPI::Simple::Send($c || [], $rank++, 0);
+			}
+		}
+	} else {
+		$changa_config = MPI::Simple::Recv(0, 0);
+	}
+	
+	# Do the builds
+	for my $c (@{$changa_config}) {
+		my ($charm_src, $id, $opts) = @{$c}{'charm_src','id','opts'};
+		my $dest = "$args{'build-dir'}/changa/$id";
+		
+		try {
+			my $time = build_changa($log, "$args{'build-dir'}/charm/$charm_src", $dest, "@$opts");
+			push @{$build_times{'changa'}}, $time;
+		} catch {
+			# If there is an error, it will be reported in the log.
+			# We can continue without issue.
 		}
 	}
-	return @build_times;
+
+	MPI::Simple::Barrier();
+	write_log($log_string);
 }
 
-sub display_stats {
-	my ($fdLog, $build_times) = @_;
-
+if($mpi_rank == 0){
+	# Collect the build times from the other ranks
+	if($mpi_size > 1) {
+		my $count = 1; # Don't include rank 0
+		while($count++ < $mpi_size) {
+			my $times = MPI::Simple::Recv('any', 0);
+			for my $type ('changa', 'charm') {
+				if(scalar @{$times->{$type}} > 0) {
+					push @{$build_times{$type}}, @{$times->{$type}};
+				}
+			}
+		}
+	}
+	
+	open my $fdLog, '>>', $args{'log-file'};
+	
 	# Display build statistics in log file
 	print $fdLog "\n\n", '*'x10, " Build statistics ", '*'x10, "\n";
-	for my $type (keys %{$build_times}) {
-		print $fdLog "Built ", scalar @{$build_times->{$type}}, " versions of $type.\n";
+	for my $type (keys %build_times) {
+		print $fdLog "Built ", scalar @{$build_times{$type}}, " versions of $type.\n";
 		use ChaNGa::Util qw(mean stddev);
-		my $avg = mean($build_times->{$type});
-		my $std = stddev($avg, $build_times->{$type});
+		my $avg = mean($build_times{$type});
+		my $std = stddev($avg, $build_times{$type});
 		printf($fdLog "    time: %.3f +- %.3f seconds\n", $avg, $std);
 	}
 
@@ -148,52 +278,14 @@ sub display_stats {
 	my $build_file = 'build.timings';
 	move($build_file, "$build_file.bak") if -e $build_file;
 	open my $fdOut, '>', $build_file or die "Unable to open $build_file: $!\n";
-	for my $type (keys %{$build_times}) {
-		print $fdOut "$type: ", join(',', @{$build_times->{$type}}), "\n";
+	for my $type (keys %build_times) {
+		print $fdOut "$type: ", join(',', @{$build_times{$type}}), "\n";
 	}
+} else {
+	MPI::Simple::Send(\%build_times, 0, 0);
 }
 
-sub print_log {
-	print $fdLog $_[0], "\n";
-}
-
-#----------------------------------------------------------------------------------------
-
-my $log_string;
-open my $log, '>', \$log_string;
-print $log "Start time: ", scalar localtime, "\n";
-
-my @charm_opts = grep {$args{$_} == 1} keys %{Charm::Build::Opts::get_opts()};
-my %charm_config = Charm::Build::get_config(@charm_opts);
-
-my %build_times = (
-	'charm' => [],
-	'changa' => []
-);
-
-# Build all the versions of Charm++
-if ($args{'charm'}) {
-	try {
-		@{$build_times{'charm'}} = do_charm_build($log, \%charm_config);
-	} catch {
-		print_log($log_string) and die;
-	}
-}
-
-# Build all the versions of ChaNGa
-if ($args{'changa'}) {
-	try {
-		@{$build_times{'changa'}} = do_changa_build($log, \%charm_config);
-	} catch {
-		print_log($log_string) and die;
-	}
-}
-
-print $log "End time: ", scalar localtime, "\n";
-
-display_stats($log, \%build_times);
-
-print_log($log_string);
+MPI::Simple::Finalize();
 
 __END__
 

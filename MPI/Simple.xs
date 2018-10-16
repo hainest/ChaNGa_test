@@ -46,8 +46,10 @@ void mpi_simple_init() {
 
 	int is_initialized = 0;
 	MPI_Initialized(&is_initialized);
-	if (!is_initialized)
-		MPI_Init(NULL, NULL);
+	if (!is_initialized) {
+		int dummy=0;
+		MPI_Init_thread(NULL, NULL, MPI_THREAD_SERIALIZED, &dummy);
+	}
 }
 int mpi_simple_comm_rank() {
 	int trank;

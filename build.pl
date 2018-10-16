@@ -5,7 +5,6 @@ use lib cwd();
 use Getopt::Long qw(GetOptions);
 use File::Copy qw(copy move);
 use File::Path qw(make_path);
-use Configure;
 use ChaNGa;
 use ChaNGa::Util qw(execute any);
 use ChaNGa::Build qw(:all);

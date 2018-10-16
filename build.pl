@@ -98,8 +98,10 @@ sub build_charm {
 	return timediff(Benchmark->new(), $begin)->real;
 }
 sub build_changa {
-	my ($fdLog, $charm_src, $dest, $opts) = @_;
-	print $fdLog "Building ChaNGa using '$opts -j$args{'njobs'}'... ";
+	my ($fdLog, $charm_src, $id, $opts) = @_;
+	print $fdLog "Building ChaNGa($id) using '$opts -j$args{'njobs'}'... ";
+	
+	my $dest = "$args{'build-dir'}/changa/$id";
 	make_path($dest);
 
 	my $begin = Benchmark->new();
@@ -236,7 +238,7 @@ if ($args{'changa'}) {
 		my $dest = "$args{'build-dir'}/changa/$id";
 		
 		try {
-			my $time = build_changa($log, "$args{'build-dir'}/charm/$charm_src", $dest, "@$opts");
+			my $time = build_changa($log, "$args{'build-dir'}/charm/$charm_src", $id, "@$opts");
 			push @{$build_times{'changa'}}, $time;
 		} catch {
 			# If there is an error, it will be reported in the log.

@@ -164,7 +164,7 @@ sub get_options {
 	my @names;
 
 	if ($type eq 'basic') {
-		push @names, qw(hexadecapole bigkeys gpu-local-walk);
+		push @names, qw(hexadecapole bigkeys);
 	} elsif ($type eq 'force-test') {
 		push @names, qw(hexadecapole bigkeys float arch);
 	} elsif($type eq 'release') {
@@ -178,6 +178,9 @@ sub get_options {
 		}
 		push @names, @keys;
 	}
+	
+	# Only add when not doing a default build
+	push @names, 'gpu-local-walk' if $is_cuda && @names > 0;
 
 	my $all_options = ChaNGa::Build::Opts::get_opts();
 	if (@names > 1) {

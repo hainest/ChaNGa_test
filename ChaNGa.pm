@@ -199,4 +199,30 @@ sub get_options {
 	return sub { shift @switches; };
 }
 
+sub get_config {
+	my ($build_type, $charm_config, $cuda_dir) = @_;
+
+	my @config = ();
+	for my $charm_type (keys %{$charm_config}) {
+		my $is_cuda = $charm_type =~ /cuda/;
+		my $is_proj = $charm_type =~ /projections/;
+		
+		# Each configuration gets a copy of all the ChaNGa switches.
+		# This consumes more memory, but is easier to handle.
+		my @switches = ChaNGa::Build::get_options($build_type, $is_cuda);
+		
+		for my $s (@switches) {
+			push @{$s}, "--with-cuda=$cuda_dir" if $is_cuda;
+			push @{$s}, "--enable-projections" if $is_proj;
+			
+			use Digest::MD5 qw(md5_base64);
+			my $id = md5_base64(localtime . "@$s");
+			$id =~ s|/|_|g;
+			
+			push @config, {'charm_src'=>$charm_type, 'id'=>$id, 'opts'=>$s};
+		}
+	}
+	return \@config;
+}
+
 1;

@@ -44,9 +44,9 @@ void mpi_simple_init() {
 	 */
 	dlopen("libmpi.so", RTLD_NOW | RTLD_GLOBAL | RTLD_NOLOAD);
 
-	int flag = 0;
-	MPI_Initialized(&flag);
-	if (!flag)
+	int is_initialized = 0;
+	MPI_Initialized(&is_initialized);
+	if (!is_initialized)
 		MPI_Init(NULL, NULL);
 }
 int mpi_simple_comm_rank() {
@@ -63,9 +63,9 @@ void mpi_simple_barrier() {
 	MPI_Barrier(MPI_COMM_WORLD);
 }
 void mpi_simple_finalize() {
-	int flag = 0;
-	MPI_Initialized(&flag);
-	if(flag)
+	int is_initialized = 0;
+	MPI_Initialized(&is_initialized);
+	if(is_initialized)
 		MPI_Finalize();
 }
 

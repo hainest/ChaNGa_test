@@ -9,7 +9,6 @@ use Configure;
 use ChaNGa;
 use ChaNGa::Util qw(execute any);
 use ChaNGa::Build qw(:all);
-use Cwd qw(cwd);
 use Pod::Usage;
 use Benchmark qw(timediff :hireswallclock);
 use Digest::MD5 qw(md5_base64);

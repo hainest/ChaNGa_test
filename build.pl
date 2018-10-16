@@ -194,6 +194,7 @@ if($args{'charm'}) {
 	
 	MPI::Simple::Barrier();
 	write_log($log_string);
+	$log_string = undef;
 
 	# If any rank had an error, we can't continue
 	MPI::Simple::Die_sync() if MPI::Simple::Error($error);
@@ -251,6 +252,7 @@ if ($args{'changa'}) {
 
 	MPI::Simple::Barrier();
 	write_log($log_string);
+	$log_string = undef;
 }
 
 if($mpi_rank == 0){

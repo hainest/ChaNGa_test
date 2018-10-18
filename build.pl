@@ -103,12 +103,15 @@ sub build_changa {
 	
 	my $dest = "$args{'build-dir'}/changa/$id";
 	make_path($dest);
+	
+	use ChaNGa::Util qw(copy_dir);
+	copy_dir("$args{'changa-dir'}/../utility/structures", "$dest/structures");
 
 	my $begin = Benchmark->new();
 	my $res = execute("
 		cd $dest
 		export CHARM_DIR=\"$charm_src\"
-		$args{'changa-dir'}/configure $opts 1>config.out 2>config.err
+		$args{'changa-dir'}/configure STRUCT_DIR=structures $opts 1>config.out 2>config.err
 		make -j$args{'njobs'} 1>build.out 2>build.err
 	");
 	if (!$res) {

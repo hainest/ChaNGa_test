@@ -174,22 +174,25 @@ our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 sub get_options {
 	my ($type, $is_cuda) = @_;
-	my @names;
+	
+	my %categories;
+	$categories{'default'} = [];
+	$categories{'basic'} = [qw(hexadecapole bigkeys)];
+	$categories{'force-test'} = [@{$categories{'basic'}}, 'float'];
+	$categories{'sph'} = [qw(sph-kernel cooling cullenalpha damping diffusion feedbacklimit rtforce vsigvisc)];
+	$categories{'gravity'} = [@{$categories{'force-test'}}, qw(changesoft dtadjust interlist)];
+	$categories{'release'} = [@{$categories{'gravity'}}, @{$categories{'sph'}}];
 
-	if ($type eq 'basic') {
-		push @names, qw(hexadecapole bigkeys);
-	} elsif ($type eq 'force-test') {
-		push @names, qw(hexadecapole bigkeys float arch);
-	} elsif($type eq 'release') {
-		push @names, qw(hexadecapole changesoft float arch bigkeys sph-kernel cooling);
-	} elsif ($type ne 'default') {
-		# Assume comma-separated list of keys
-		my $opts = ChaNGa::Build::Opts::get_opts();
-		my @keys = split(',', $type);
-		for my $k (@keys) {
+	my @names;
+	my $opts = ChaNGa::Build::Opts::get_opts();
+	my @keys = split(',', $type);
+	for my $k (@keys) {
+		if (exists $categories{$k}) {
+			push @names, @{$categories{$k}};
+		} else {
 			die "Unknown ChaNGa build option '$k'\n" unless exists $opts->{$k};
+			push @names, $k;
 		}
-		push @names, @keys;
 	}
 	
 	# Only add when not doing a default build

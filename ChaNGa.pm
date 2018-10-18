@@ -4,7 +4,7 @@ package ChaNGa::Util;
 BEGIN { $INC{"ChaNGa/Util.pm"} = $0; }
 
 use base 'Exporter';
-our @EXPORT_OK = qw(execute any combinations mean stddev);
+our @EXPORT_OK = qw(execute any combinations mean stddev copy_dir);
 
 BEGIN {
     eval {
@@ -26,6 +26,19 @@ BEGIN {
 					return !!0;
 				};
 			}
+		}
+		
+		require File::Copy::Recursive;
+		File::Copy::Recursive->import();
+		if(defined &File::Copy::Recursive::dircopy) {
+			*copy_dir = File::Copy::Recursive::dircopy;
+		} else {
+			*copy_dir = sub($$) {
+				my ($from, $to) = @_;
+				use File::Path qw(make_path);
+				make_path $to unless -d $to;
+				`cp -R $from $to`;
+			};
 		}
     };
 }

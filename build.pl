@@ -35,6 +35,7 @@ my %args = (
 	'njobs' 		=> 2,
 	'charm'			=> 1,
 	'changa'		=> 1,
+	'debug'			=> 1,
 	'help' 			=> 0
 );
 
@@ -43,7 +44,8 @@ my %args = (
 		'prefix=s', 'charm-dir=s', 'changa-dir=s', 'log-file=s',
 		'build-dir=s', 'charm-target=s', 'charm-options=s',
 		'cuda-dir=s', 'build-type=s', 'cuda!', 'smp!',
-		'projections!', 'njobs=i', 'charm!', 'changa!', 'help'
+		'projections!', 'njobs=i', 'charm!', 'changa!', 'debug!',
+		'help'
 	);
 	
 	if(!$res) {
@@ -98,8 +100,8 @@ sub build_charm {
 	return timediff(Benchmark->new(), $begin)->real;
 }
 sub build_changa {
-	my ($fdLog, $charm_src, $id, $opts) = @_;
-	print $fdLog "Building ChaNGa($id) using '$opts -j$args{'njobs'}'... ";
+	my ($fdLog, $charm_src, $id, $debug, $opts) = @_;
+	print $fdLog "Building ChaNGa($id) using '$debug $opts -j$args{'njobs'}'... ";
 	
 	my $dest = "$args{'build-dir'}/changa/$id";
 	make_path($dest);
@@ -112,7 +114,7 @@ sub build_changa {
 		cd $dest
 		export CHARM_DIR=\"$charm_src\"
 		$args{'changa-dir'}/configure STRUCT_DIR=structures $opts 1>config.out 2>config.err
-		make -j$args{'njobs'} 1>build.out 2>build.err
+		make $debug -j$args{'njobs'} 1>build.out 2>build.err
 	");
 	if (!$res) {
 		print $fdLog "FAILED\n" and die;
@@ -235,21 +237,24 @@ if ($args{'changa'}) {
 	} else {
 		$changa_config = MPI::Simple::Recv(0, 0);
 	}
-	
+
 	# Do the builds
+	my @debug_flags = $args{'debug'} ? ('DEBUG=1','DEBUG=0') : ('');
 	for my $c (@{$changa_config}) {
 		my ($charm_src, $opts) = @{$c}{'charm_src','opts'};
 		
-		use Digest::MD5 qw(md5_base64);
-		my $id = md5_base64(localtime . "@$opts");
-		$id =~ s|/|_|g;
-		
-		try {
-			my $time = build_changa($log, "$args{'build-dir'}/charm/$charm_src", $id, "@$opts");
-			push @{$build_times{'changa'}}, $time;
-		} catch {
-			# If there is an error, it will be reported in the log.
-			# We can continue without issue.
+		for my $debug (@debug_flags) {
+			use Digest::MD5 qw(md5_base64);
+			my $id = md5_base64(localtime . "$debug @$opts");
+			$id =~ s|/|_|g;
+			
+			try {
+				my $time = build_changa($log, "$args{'build-dir'}/charm/$charm_src", $id, $debug, "@$opts");
+				push @{$build_times{'changa'}}, $time;
+			} catch {
+				# If there is an error, it will be reported in the log.
+				# We can continue without issue.
+			}
 		}
 	}
 
@@ -323,6 +328,7 @@ build [options]
    --njobs=N            Number of make jobs (default: N=2)
    --[no-]charm         Build the Charm++ libraries for ChaNGa (default: yes)
    --[no-]changa        Build ChaNGa (default: yes)
+   --[no-]debug         Include debug build of ChaNGa in tests (default: yes)
    --help               Print this help message
 
 =head1 NOTES

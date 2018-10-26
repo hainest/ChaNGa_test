@@ -108,6 +108,7 @@ sub build_changa {
 	
 	use ChaNGa::Util qw(copy_dir);
 	copy_dir("$args{'changa-dir'}/../utility/structures", "$dest/structures");
+	execute("cd $dest/structures && make clean");
 
 	my $begin = Benchmark->new();
 	my $res = execute("

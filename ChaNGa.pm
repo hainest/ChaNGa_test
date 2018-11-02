@@ -179,7 +179,7 @@ sub get_options {
 	my %categories;
 	$categories{'default'} = [];
 	$categories{'basic'} = [qw(hexadecapole bigkeys)];
-	$categories{'force-test'} = [@{$categories{'basic'}}, 'float'];
+	$categories{'force-test'} = [qw(hexadecapole tree-build float)];
 	$categories{'sph'} = [qw(sph-kernel cooling cullenalpha damping diffusion feedbacklimit rtforce vsigvisc)];
 	$categories{'gravity'} = [@{$categories{'force-test'}}, qw(changesoft dtadjust interlist)];
 

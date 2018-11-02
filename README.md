@@ -15,7 +15,7 @@ A tool for automating building Charm++ and ChaNGa
 		--charm-target=T     Build charm++ for target T (default: netlrts-linux-x86_64)
 		--charm-options=S    Pass options S to charm build (wrap S in quotes to pass many values)
 		--cuda-dir           Override CUDA toolkit directory
-		--build-type         Type of build test to perform (default, basic, force-test, release)
+		--build-type         Type of build test to perform (default, basic, force-test, sph, gravity)
 		--[no-]cuda          Enable CUDA tests (default: yes)
 		--[no-]smp           Enable SMP tests (default: no)
 		--[no-]projections   Enable Projections tests (default: no)

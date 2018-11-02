@@ -182,7 +182,6 @@ sub get_options {
 	$categories{'force-test'} = [@{$categories{'basic'}}, 'float'];
 	$categories{'sph'} = [qw(sph-kernel cooling cullenalpha damping diffusion feedbacklimit rtforce vsigvisc)];
 	$categories{'gravity'} = [@{$categories{'force-test'}}, qw(changesoft dtadjust interlist)];
-	$categories{'release'} = [@{$categories{'gravity'}}, @{$categories{'sph'}}];
 
 	my @names;
 	my $opts = ChaNGa::Build::Opts::get_opts();

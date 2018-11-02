@@ -159,7 +159,8 @@ BEGIN { $INC{"ChaNGa/Build/Opts.pm"} = $0; }
 	    'sanitizer' => Configure::Option::Enable->new('sanitizer', ('none', 'address', 'thread')),
 	   'sph-kernel' => Configure::Option::Enable->new('sph-kernel', ('m4','m6','wendland')),
 	     'vsigvisc' => Configure::Option::Enable->new('vsigvisc'),
-   'gpu-local-walk' => Configure::Option::Enable->new('gpu-local-tree-walk')
+   'gpu-local-walk' => Configure::Option::Enable->new('gpu-local-tree-walk'),
+       'tree-build' => Configure::Option::Enable->new('tree-build', ('merge-remote','split-phase'))
 	);
 	sub get_opts { return \%opts; }
 }

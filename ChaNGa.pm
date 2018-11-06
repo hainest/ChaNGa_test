@@ -210,12 +210,13 @@ sub get_options {
 		return sub { $iter->get; };
 	}
 
-	my @switches = (['']);
+	my @switches = $type eq 'default' ? (['']) : ();
 	if (@names == 1) {
 		for my $s ($all_options->{$names[0]}->switches) {
 			push @switches, [$s];
 		}
 	}
+
 	return @switches if wantarray;
 	return sub { shift @switches; };
 }

@@ -166,8 +166,10 @@ BEGIN { $INC{"ChaNGa/Build/Opts.pm"} = $0; }
 	$categories{'default'} = [];
 	$categories{'basic'} = [qw(hexadecapole bigkeys)];
 	$categories{'force-test'} = [qw(hexadecapole tree-build float)];
-	$categories{'sph'} = [qw(sph-kernel cooling cullenalpha damping diffusion feedbacklimit rtforce vsigvisc)];
-	$categories{'gravity'} = [@{$categories{'force-test'}}, qw(changesoft dtadjust interlist)];
+	$categories{'sph-feedback'} = [qw(cooling feedbacklimit diffusion)];
+	$categories{'sph-viscosity'} = [qw(cullenalpha vsigvisc)];
+	$categories{'sph'} = [qw(sph-kernel rtforce damping)];
+	$categories{'gravity'} = [@{$categories{'force-test'}}, qw(changesoft dtadjust)];
 	
 	sub get_opts { return \%opts; }
 	sub get_categories { return \%categories; }

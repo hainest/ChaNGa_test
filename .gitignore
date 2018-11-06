@@ -20,3 +20,4 @@ MPI/Makefile
 MPI/Simple.c
 MPI/blib/
 MPI/pm_to_blib
+MPI/Simple.pm

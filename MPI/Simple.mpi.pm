@@ -39,5 +39,6 @@ sub Finalize { mpi_simple_finalize(); }
 sub Die { Finalize(); die; }
 sub Die_sync { Barrier(); Die(); }
 sub Error { mpi_simple_error($_[0]); }
+sub MPI::Simple::Mocking { return !!0; }
 
 1;

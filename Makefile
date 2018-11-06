@@ -1,4 +1,5 @@
 MPICC := $(if $(MPICC),$(MPICC),mpicc)
+MPIEXEC := $(if $(MPIEXEC),$(MPIEXEC),mpiexec)
 
 mpi_inc := $(addprefix -I,$(shell $(MPICC) --showme:incdirs))
 has_mpi := $(shell $(MPICC) --showme:version || echo "0")
@@ -23,7 +24,7 @@ clean:
 
 test:
 ifneq ($(has_mpi),0)
-	@ cd MPI/t && mpiexec -np 2 perl test.pl
+	@ cd MPI/t && $(MPIEXEC) -np 2 perl test.pl
 else
 	@ cd MPI/t && perl test.pl
 endif

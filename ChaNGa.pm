@@ -161,7 +161,16 @@ BEGIN { $INC{"ChaNGa/Build/Opts.pm"} = $0; }
    'gpu-local-walk' => Configure::Option::Enable->new('gpu-local-tree-walk'),
        'tree-build' => Configure::Option::Enable->new('tree-build', ('merge-remote','split-phase'))
 	);
+	
+	my %categories;
+	$categories{'default'} = [];
+	$categories{'basic'} = [qw(hexadecapole bigkeys)];
+	$categories{'force-test'} = [qw(hexadecapole tree-build float)];
+	$categories{'sph'} = [qw(sph-kernel cooling cullenalpha damping diffusion feedbacklimit rtforce vsigvisc)];
+	$categories{'gravity'} = [@{$categories{'force-test'}}, qw(changesoft dtadjust interlist)];
+	
 	sub get_opts { return \%opts; }
+	sub get_categories { return \%categories; }
 }
 
 #-----------------------------------------------#
@@ -175,19 +184,14 @@ our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 sub get_options {
 	my ($type, $is_cuda) = @_;
 	
-	my %categories;
-	$categories{'default'} = [];
-	$categories{'basic'} = [qw(hexadecapole bigkeys)];
-	$categories{'force-test'} = [qw(hexadecapole tree-build float)];
-	$categories{'sph'} = [qw(sph-kernel cooling cullenalpha damping diffusion feedbacklimit rtforce vsigvisc)];
-	$categories{'gravity'} = [@{$categories{'force-test'}}, qw(changesoft dtadjust interlist)];
+	my $categories = ChaNGa::Build::Opts::get_categories();
 
 	my @names;
 	my $opts = ChaNGa::Build::Opts::get_opts();
 	my @keys = split(',', $type);
 	for my $k (@keys) {
-		if (exists $categories{$k}) {
-			push @names, @{$categories{$k}};
+		if (exists $categories->{$k}) {
+			push @names, @{$categories->{$k}};
 		} else {
 			die "Unknown ChaNGa build option '$k'\n" unless exists $opts->{$k};
 			push @names, $k;

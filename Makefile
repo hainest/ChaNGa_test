@@ -10,7 +10,7 @@ endif
 all:
 ifneq ($(has_mpi),0)
 	@ cp MPI/Simple.mpi.pm MPI/Simple.pm
-	@ cd MPI && perl Makefile.PL
+	@ cd MPI && perl Makefile.PL CC=$(MPICC)
 	@ cd MPI && make CCFLAGS="-Wall -Wextra $(mpi_inc)"
 	@ cp MPI/blib/arch/auto/MPI/Simple/Simple.so MPI/
 else
@@ -18,7 +18,7 @@ else
 endif
 
 clean:
-	@ if test -e MPI/Makefile; then cd MPI && make clean; fi
+	@ if test -e MPI/Makefile; then cd MPI && make clean 2>&1 >/dev/null; fi
 	@ rm -f MPI/Simple.so MPI/Makefile MPI/Makefile.old MPI/Simple.pm
 
 test:

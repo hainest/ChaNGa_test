@@ -2,7 +2,7 @@ MPICC := $(if $(MPICC),$(MPICC),mpicc)
 MPIEXEC := $(if $(MPIEXEC),$(MPIEXEC),mpiexec)
 
 mpi_inc := $(addprefix -I,$(shell $(MPICC) --showme:incdirs))
-has_mpi := $(shell $(MPICC) --showme:version || echo "0")
+has_mpi := $(shell $(MPICC) -v || echo "0")
 
 ifeq ($(NO_MPI),1)
 	has_mpi := 0

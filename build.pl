@@ -36,6 +36,7 @@ my %args = (
 	'charm'			=> 1,
 	'changa'		=> 1,
 	'debug'			=> 1,
+	'list-opts'		=> 0,
 	'help' 			=> 0
 );
 
@@ -45,7 +46,7 @@ my %args = (
 		'build-dir=s', 'charm-target=s', 'charm-options=s',
 		'cuda-dir=s', 'build-type=s', 'cuda!', 'smp!',
 		'projections!', 'njobs=i', 'charm!', 'changa!', 'debug!',
-		'help'
+		'list-opts', 'help'
 	);
 	
 	if(!$res) {
@@ -57,6 +58,22 @@ my %args = (
 if($args{'help'}) {
 	pod2usage(-exitval => 0, -verbose => 99) if $mpi_rank == 0;
 	MPI::Simple::Die_sync();
+}
+
+if($args{'list-opts'}) {
+	{
+		local $, = "\n\t";
+		print "Options:\n\t";
+		print sort keys %{ChaNGa::Build::Opts::get_opts()};
+	}
+	print "\nCategories:\n";
+	
+	my $cats = ChaNGa::Build::Opts::get_categories();
+	for my $k (sort keys %{$cats}) {
+		print "\t$k: ", join(',', @{$cats->{$k}}), "\n";
+	}
+	MPI::Simple::Finalize();
+	exit;
 }
 
 # Sanity check
@@ -322,7 +339,7 @@ build [options]
    --charm-target=T     Build charm++ for target T (default: netlrts-linux-x86_64)
    --charm-options=S    Pass options S to charm build (wrap S in quotes to pass many values)
    --cuda-dir           Override CUDA toolkit directory
-   --build-type         Type of build test to perform (default, basic, force-test, release)
+   --build-type         Type of build test to perform (see --list-opts)
    --[no-]cuda          Enable CUDA tests (default: yes)
    --[no-]smp           Enable SMP tests (default: no)
    --[no-]projections   Enable Projections tests (default: no)
@@ -330,6 +347,7 @@ build [options]
    --[no-]charm         Build the Charm++ libraries for ChaNGa (default: yes)
    --[no-]changa        Build ChaNGa (default: yes)
    --[no-]debug         Include debug build of ChaNGa in tests (default: yes)
+   --list-opts          List the build options available for --build-type
    --help               Print this help message
 
 =head1 NOTES

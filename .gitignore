@@ -21,3 +21,10 @@ MPI/Simple.c
 MPI/blib/
 MPI/pm_to_blib
 MPI/Simple.pm
+
+# autoconf
+configure
+config.status
+config.log
+autom4te.cache
+Makefile

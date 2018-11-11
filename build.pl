@@ -307,12 +307,10 @@ if($mpi_rank == 0){
 		printf($fdLog "    time: %.3f +- %.3f seconds\n", $avg, $std);
 	}
 
-	# Save individual timings to a separate file
-	my $build_file = 'build.timings';
-	move($build_file, "$build_file.bak") if -e $build_file;
-	open my $fdOut, '>', $build_file or die "Unable to open $build_file: $!\n";
+	# Save individual timings to the log file
+	print $fdLog "\n", '-'x20, "\nIndividual Build Times (in seconds)\n";
 	for my $type (keys %build_times) {
-		print $fdOut "$type: ", join(',', @{$build_times{$type}}), "\n";
+		print $fdLog "$type: ", join(',', @{$build_times{$type}}), "\n";
 	}
 } else {
 	MPI::Simple::Send(\%build_times, 0, 0);

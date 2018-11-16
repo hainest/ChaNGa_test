@@ -7,40 +7,42 @@ use base 'Exporter';
 our @EXPORT_OK = qw(execute any combinations mean stddev copy_dir);
 
 BEGIN {
+	my $any = sub (&@) {
+		my $code = \&{shift @_};
+		for (@_) {
+			return !!1 if $code->();
+		}
+		return !!0;
+	};
     eval {
 		require List::Util;
 		List::Util->import();
 		if(defined &List::Util::any) {
-			*any = \&List::Util::any;
+			$any = \&List::Util::any;
 		} else {
 			require List::MoreUtils;
 			List::MoreUtils->import();
 			if(defined &List::MoreUtils::any) {
-				*any = \&List::MoreUtils::any;
-			} else {
-				*any = sub (&@) {
-					my $code = \&{shift @_};
-					for (@_) {
-						return !!1 if $code->();
-					}
-					return !!0;
-				};
+				$any = \&List::MoreUtils::any;
 			}
 		}
-		
+    };
+    *any = $any;
+    
+    my $copy_dir = sub($$) {
+		my ($from, $to) = @_;
+		use File::Path qw(make_path);
+		make_path $to unless -d $to;
+		`cp -R $from $to`;
+	};
+    eval{
 		require File::Copy::Recursive;
 		File::Copy::Recursive->import();
 		if(defined &File::Copy::Recursive::dircopy) {
-			*copy_dir = File::Copy::Recursive::dircopy;
-		} else {
-			*copy_dir = sub($$) {
-				my ($from, $to) = @_;
-				use File::Path qw(make_path);
-				make_path $to unless -d $to;
-				`cp -R $from $to`;
-			};
+			$copy_dir = \&File::Copy::Recursive::dircopy;
 		}
     };
+    *copy_dir = $copy_dir;
 }
 
 sub mean {

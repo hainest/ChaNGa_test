@@ -33,13 +33,19 @@ BEGIN {
 		my ($from, $to) = @_;
 		use File::Path qw(make_path);
 		make_path $to unless -d $to;
-		`cp -R $from $to`;
+		if(!&execute("cp -R $from $to")) {
+			die "Failed to copy $from to $to: $!\n";
+		}
 	};
     eval{
 		require File::Copy::Recursive;
 		File::Copy::Recursive->import();
 		if(defined &File::Copy::Recursive::dircopy) {
-			$copy_dir = \&File::Copy::Recursive::dircopy;
+			$copy_dir = sub($$) {
+				my ($from, $to) = @_;
+				File::Copy::Recursive::dircopy($from, $to)
+				or die "Failed to copy $from to $to: $!\n";
+			};
 		}
     };
     *copy_dir = $copy_dir;

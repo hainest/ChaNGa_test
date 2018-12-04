@@ -117,7 +117,7 @@ sub build_charm {
 }
 sub build_changa {
 	my ($fdLog, $charm_src, $id, $debug, $opts) = @_;
-	print $fdLog "Building ChaNGa($id) using '$debug $opts -j$args{'njobs'}'... ";
+	print $fdLog "Building ChaNGa($id) using '$debug $opts -j$args{'njobs'}' and Charm++ '$charm_src'... ";
 	
 	my $dest = "$args{'build-dir'}/changa/$id";
 	make_path($dest);

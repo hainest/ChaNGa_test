@@ -26,7 +26,6 @@ my %args = (
 	'log-file'      => undef,
 	'build-dir'		=> undef,
 	'charm-target' 	=> 'netlrts-linux-x86_64',
-	'charm-options' => '',	# This needs to be an empty string _NOT_ undef
 	'cuda-dir'		=> '',	# This needs to be an empty string _NOT_ undef
 	'build-type'	=> 'default',
 	'cuda'			=> 1,
@@ -43,7 +42,7 @@ my %args = (
 {
 	my $res = GetOptions(\%args,
 		'prefix=s', 'charm-dir=s', 'changa-dir=s', 'log-file=s',
-		'build-dir=s', 'charm-target=s', 'charm-options=s',
+		'build-dir=s', 'charm-target=s',
 		'cuda-dir=s', 'build-type=s', 'cuda!', 'smp!',
 		'projections!', 'njobs=i', 'charm!', 'changa!', 'debug!',
 		'list-opts', 'help'
@@ -107,7 +106,7 @@ sub build_charm {
 		export CUDA_DIR=$args{'cuda-dir'}
 
 		cd $dest
-		$args{'charm-dir'}/build ChaNGa $args{'charm-target'} $args{'charm-options'} $opts \\
+		$args{'charm-dir'}/build ChaNGa $args{'charm-target'} $opts \\
 		--with-production --enable-lbuserdata -j$args{'njobs'} 1>build.out 2>build.err
 	");
 	if (!$res) {
@@ -336,7 +335,6 @@ build [options]
    --log-file=FILE      Store logging data in FILE (default: prefix/build.log)
    --build-dir          Directory where outputs are stored (default: prefix/build)
    --charm-target=T     Build charm++ for target T (default: netlrts-linux-x86_64)
-   --charm-options=S    Pass options S to charm build (wrap S in quotes to pass many values)
    --cuda-dir           Override CUDA toolkit directory
    --build-type         Type of build test to perform (see --list-opts)
    --[no-]cuda          Enable CUDA tests (default: yes)

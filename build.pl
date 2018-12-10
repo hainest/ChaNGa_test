@@ -36,6 +36,7 @@ my %args = (
 	'changa'		=> 1,
 	'debug'			=> 1,
 	'list-opts'		=> 0,
+	'purge'			=> 0,
 	'help' 			=> 0
 );
 
@@ -45,7 +46,7 @@ my %args = (
 		'build-dir=s', 'charm-target=s',
 		'cuda-dir=s', 'build-type=s', 'cuda!', 'smp!',
 		'projections!', 'njobs=i', 'charm!', 'changa!', 'debug!',
-		'list-opts', 'help'
+		'list-opts', 'purge!', 'help'
 	);
 	
 	if(!$res) {
@@ -136,6 +137,10 @@ sub build_changa {
 	if (!$res) {
 		print $fdLog "FAILED\n" and die;
 	}
+	
+	# Purge make-generated files
+	execute("cd $dest; make dist-clean 2>&1 >/dev/null") if $args{'purge'};
+	
 	print $fdLog "OK\n";
 	return timediff(Benchmark->new(), $begin)->real;
 }
@@ -345,6 +350,7 @@ build [options]
    --[no-]changa        Build ChaNGa (default: yes)
    --[no-]debug         Include debug build of ChaNGa in tests (default: yes)
    --list-opts          List the build options available for --build-type
+   --[no-]purge         Remove make-generated files after building ChaNGa
    --help               Print this help message
 
 =head1 NOTES

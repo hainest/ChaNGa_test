@@ -131,7 +131,7 @@ sub get_config {
 	if (@opts > 1) {
 		my $iter = ChaNGa::Util::combinations(map {[$_, '']} @opts);
 		my @combos = $iter->combinations();
-		@src_dirs = map {join('-', grep {$_ ne ''} @$_)} @combos;
+		@src_dirs = map {join('-', sort grep {$_ ne ''} @$_)} @combos;
 	}
 	my @switches = get_options(@opts);
 	

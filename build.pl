@@ -49,15 +49,13 @@ my %args = (
 		'list-opts', 'purge!', 'help'
 	);
 	
-	if(!$res) {
-		pod2usage(2) if $mpi_rank == 0;
-		MPI::Simple::Die_sync();
+	if(!$res || $args{'help'}) {
+		if ($mpi_rank == 0) {
+			MPI::Simple::Finalize();
+			pod2usage(-exitval=>0);
+		}
+		MPI::Simple::Exit();
 	}
-}
-
-if($args{'help'}) {
-	pod2usage(-exitval => 0, -verbose => 99) if $mpi_rank == 0;
-	MPI::Simple::Die_sync();
 }
 
 if($args{'list-opts'}) {

@@ -29,8 +29,8 @@ sub Comm_size { return 1; }
 sub Comm_rank { return 0; }
 sub Barrier { }
 sub Finalize { }
-sub Die { die; }
-sub Die_sync { Die(); }
+sub Die { die $_[0]; }
+sub Die_sync { Die(@_); }
 sub Error { return $_[0]; }
 sub MPI::Simple::Mocking { return !!1; }
 

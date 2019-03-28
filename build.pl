@@ -75,8 +75,7 @@ if($args{'list-opts'}) {
 
 # Sanity check
 if(!$args{'charm'} && !$args{'changa'}) {
-	print STDERR "Must build at least one configuration\n" if $mpi_rank == 0;
-	MPI::Simple::Die_sync();
+	MPI::Simple::Die_sync("Must build at least one configuration");
 }
 
 # Default directory and file locations
@@ -221,7 +220,7 @@ if($args{'charm'}) {
 	seek($log, 0, 0); # rewind the stream
 
 	# If any rank had an error, we can't continue
-	MPI::Simple::Die_sync() if MPI::Simple::Error($error);
+	MPI::Simple::Die_sync("An error occurred when building Charm: see $args{'log-file'} for details") if MPI::Simple::Error($error);
 }
 
 if ($args{'changa'}) {

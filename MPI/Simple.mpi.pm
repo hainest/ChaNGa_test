@@ -38,6 +38,8 @@ sub Barrier { mpi_simple_barrier(); }
 sub Finalize { mpi_simple_finalize(); }
 sub Die { Finalize(); die $_[0]; }
 sub Die_sync { Barrier(); Die(@_); }
+sub Exit { Finalize(); exit(0); }
+sub Exit_sync { Barrier(); Exit(); };
 sub Error { mpi_simple_error($_[0]); }
 sub MPI::Simple::Mocking { return !!0; }
 

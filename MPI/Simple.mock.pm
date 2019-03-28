@@ -31,6 +31,8 @@ sub Barrier { }
 sub Finalize { }
 sub Die { die $_[0]; }
 sub Die_sync { Die(@_); }
+sub Exit { Finalize(); exit(0); }
+sub Exit_sync { Barrier(); Exit(); };
 sub Error { return $_[0]; }
 sub MPI::Simple::Mocking { return !!1; }
 

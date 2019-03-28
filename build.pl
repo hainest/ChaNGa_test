@@ -270,9 +270,8 @@ if ($args{'changa'}) {
 				my $time = build_changa($log, "$args{'build-dir'}/charm/$charm_src", $id, $debug, "@$opts");
 				push @{$build_times{'changa'}}, $time;
 			} catch {
-				# Just save the message to the log
-				# Recovering from errors would require much more work
-				print $log "$_\n" if $_;
+				# We can't recover from errors here, so
+				# just consume it and keep going.
 			};
 		}
 	}

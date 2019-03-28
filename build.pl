@@ -72,8 +72,7 @@ if($args{'list-opts'}) {
 	for my $k (sort keys %{$cats}) {
 		print "\t$k: ", join(',', @{$cats->{$k}}), "\n";
 	}
-	MPI::Simple::Finalize();
-	exit;
+	MPI::Simple::Exit();
 }
 
 # Sanity check

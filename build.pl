@@ -91,6 +91,7 @@ if ($mpi_rank == 0) {
 	# Create the build directory
 	make_path($args{'build-dir'});
 }
+MPI::Simple::Barrier();
 
 sub build_charm {
 	my ($fdLog, $dest, $opts) = @_;

@@ -2,24 +2,24 @@ MPIEXEC := $(if $(MPIEXEC),$(MPIEXEC),mpiexec)
 
 all:
 ifeq (@HAVE_MPI@,yes)
-	@ cp MPI/Simple.mpi.pm MPI/Simple.pm
-	@ cd MPI && perl Makefile.PL CC=@MPICC@
-	@ cd MPI && make CCFLAGS="-Wall -Wextra"
-	@ cp MPI/blib/arch/auto/MPI/Simple/Simple.so MPI/
+	@ cp lib/MPI/Simple.mpi.pm lib/MPI/Simple.pm
+	@ cd lib/MPI && perl Makefile.PL CC=@MPICC@
+	@ cd lib/MPI && make CCFLAGS="-Wall -Wextra"
+	@ cp lib/MPI/blib/arch/auto/MPI/Simple/Simple.so lib/MPI/
 else
-	@ cp MPI/Simple.mock.pm MPI/Simple.pm
+	@ cp lib/MPI/Simple.mock.pm lib/MPI/Simple.pm
 endif
 
 clean:
-	@ if test -e MPI/Makefile; then cd MPI && make clean 2>&1 >/dev/null; fi
-	@ rm -f MPI/Simple.so MPI/Makefile MPI/Makefile.old MPI/Simple.pm
+	@ if test -e lib/MPI/Makefile; then cd lib/MPI && make clean 2>&1 >/dev/null; fi
+	@ rm -f lib/MPI/Simple.so lib/MPI/Makefile lib/MPI/Makefile.old lib/MPI/Simple.pm
 
 dist-clean: clean
 	@ rm Makefile
 
 test:
 ifeq (@HAVE_MPI@,yes)
-	@ cd MPI/t && $(MPIEXEC) -np 2 perl test.pl
+	@ cd lib/MPI/t && $(MPIEXEC) -np 2 perl test.pl
 else
-	@ cd MPI/t && perl test.pl
+	@ cd lib/MPI/t && perl test.pl
 endif

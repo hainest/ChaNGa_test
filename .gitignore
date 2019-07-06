@@ -1,6 +1,7 @@
 .project
 .cproject
 .pydevproject
+.includepath
 *.o
 *.so
 *.tipsy
@@ -14,13 +15,13 @@ src/
 results/
 *.log
 
-MPI/MYMETA.json
-MPI/MYMETA.yml
-MPI/Makefile
-MPI/Simple.c
-MPI/blib/
-MPI/pm_to_blib
-MPI/Simple.pm
+lib/MPI/MYMETA.json
+lib/MPI/MYMETA.yml
+lib/MPI/Makefile
+lib/MPI/Simple.c
+lib/MPI/blib/
+lib/MPI/pm_to_blib
+lib/MPI/Simple.pm
 
 # autoconf
 configure

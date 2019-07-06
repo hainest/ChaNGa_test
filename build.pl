@@ -267,7 +267,7 @@ if ($args{'changa'}) {
 		
 		for my $debug (@debug_flags) {
 			use Digest::MD5 qw(md5_base64);
-			my $id = md5_base64(localtime . "$debug @$opts");
+			my $id = md5_base64(localtime() . "$debug @$opts");
 			$id =~ s|/|_|g;
 			
 			try {

@@ -129,7 +129,7 @@ sub build_changa {
 		cd $dest
 		export CHARM_DIR=\"$charm_src\"
 		$args{'changa-dir'}/configure STRUCT_DIR=structures $opts 1>config.out 2>config.err
-		make $debug -j$args{'njobs'} 1>build.out 2>build.err
+		make VERBOSE=1 $debug -j$args{'njobs'} 1>build.out 2>build.err
 	");
 	if (!$res) {
 		print $fdLog "FAILED\n" and die;

@@ -37,6 +37,8 @@ my %args = (
 	'debug'			=> 1,
 	'list-opts'		=> 0,
 	'purge'			=> 0,
+	'c-compiler'	=> 'gcc',
+	'cxx-compiler'	=> 'g++',
 	'help' 			=> 0
 );
 
@@ -46,7 +48,7 @@ my %args = (
 		'build-dir=s', 'charm-target=s',
 		'cuda-dir=s', 'build-type=s', 'cuda!', 'smp!',
 		'projections!', 'njobs=i', 'charm!', 'changa!', 'debug!',
-		'list-opts', 'purge!', 'help'
+		'list-opts', 'purge!', 'c-compiler=s', 'cxx-compiler=s', 'help'
 	);
 	
 	if(!$res || $args{'help'}) {
@@ -102,6 +104,8 @@ sub build_charm {
 	my $res = execute("
 		cd $dest
 		export CUDA_DIR=$args{'cuda-dir'}
+		export CC=$args{'c-compiler'}
+		export CXX=$args{'cxx-compiler'}
 
 		cd $dest
 		$args{'charm-dir'}/build ChaNGa $args{'charm-target'} $opts \\
@@ -131,6 +135,8 @@ sub build_changa {
 	my $res = execute("
 		cd $dest
 		export CHARM_DIR=\"$charm_src\"
+		export CC=$args{'c-compiler'}
+		export CXX=$args{'cxx-compiler'}
 		$args{'changa-dir'}/configure STRUCT_DIR=structures $opts 1>config.out 2>config.err
 		make VERBOSE=1 $debug -j$args{'njobs'} 1>build.out 2>build.err
 	");
@@ -350,6 +356,8 @@ build [options]
    --[no-]debug         Include debug build of ChaNGa in tests (default: yes)
    --list-opts          List the build options available for --build-type
    --[no-]purge         Remove make-generated files after building ChaNGa
+   --c-compiler         Name of the C language compiler (default: gcc)
+   --cxx-compiler       Name of the C++ language compiler (default: g++)
    --help               Print this help message
 
 =head1 NOTES

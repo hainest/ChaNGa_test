@@ -108,7 +108,7 @@ sub build_charm {
 		export CXX=$args{'cxx-compiler'}
 
 		cd $dest
-		$args{'charm-dir'}/build ChaNGa $args{'c-compiler'} $args{'charm-target'} $opts \\
+		$args{'charm-dir'}/build ChaNGa $args{'charm-target'} $args{'c-compiler'} $opts \\
 		--with-production --enable-lbuserdata -j$args{'njobs'} 1>build.out 2>build.err
 	");
 	if (!$res) {

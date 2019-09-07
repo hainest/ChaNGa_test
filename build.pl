@@ -102,8 +102,6 @@ sub build_charm {
 	my $res = execute("
 		cd $dest
 		export CUDA_DIR=$args{'cuda-dir'}
-
-		cd $dest
 		$args{'charm-dir'}/build ChaNGa $args{'charm-target'} $opts \\
 		--with-production --enable-lbuserdata -j$args{'njobs'} 1>build.out 2>build.err
 	");

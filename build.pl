@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Cwd qw(cwd);
+use Cwd qw(cwd realpath);
 use lib cwd();
 use Getopt::Long qw(GetOptions);
 use File::Copy qw(copy move);
@@ -83,6 +83,12 @@ $args{'changa-dir'} //= "$args{'prefix'}/changa";
 $args{'charm-dir'} //= "$args{'prefix'}/charm";
 $args{'build-dir'} //= "$args{'prefix'}/build";
 $args{'log-file'} //= "$args{'prefix'}/build.log";
+
+# Canonicalize paths
+for my $d ('changa-dir', 'charm-dir', 'build-dir', 'log-file') {
+	# NB: realpath('') eq cwd()
+	$args{$d} = realpath($args{$d}) if $args{$d} ne '';
+}
 
 if ($mpi_rank == 0) {
 	# Save a backup, if the log file already exists

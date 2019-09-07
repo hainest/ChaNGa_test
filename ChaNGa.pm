@@ -162,9 +162,14 @@ BEGIN { $INC{"ChaNGa/Build/Opts.pm"} = $0; }
 	'feedbacklimit' => Configure::Option::Enable->new('feedbacklimit'),
 	        'float' => Configure::Option::Enable->new('float'),
 	 'hexadecapole' => Configure::Option::Enable->new('hexadecapole'),
+	    'interlist' => Configure::Option::Enable->new('interlist', ('1','2')),
+	 'nsmoothinner' => Configure::Option::Enable->new('nsmoothinner'),
 	      'rtforce' => Configure::Option::Enable->new('rtforce'),
 	    'sanitizer' => Configure::Option::Enable->new('sanitizer', ('none', 'address', 'thread')),
+	    'sidminter' => Configure::Option::Enable->new('sidminter'),
 	   'sph-kernel' => Configure::Option::Enable->new('sph-kernel', ('m4','m6','wendland')),
+	     'splitgas' => Configure::Option::Enable->new('splitgas'),
+	  'superbubble' => Configure::Option::Enable->new('superbubble'),
 	     'vsigvisc' => Configure::Option::Enable->new('vsigvisc'),
    'gpu-local-walk' => Configure::Option::Enable->new('gpu-local-tree-walk'),
        'tree-build' => Configure::Option::Enable->new('tree-build', ('merge-remote','split-phase'))
@@ -174,10 +179,10 @@ BEGIN { $INC{"ChaNGa/Build/Opts.pm"} = $0; }
 	$categories{'default'} = [];
 	$categories{'basic'} = [qw(hexadecapole bigkeys)];
 	$categories{'force-test'} = [qw(hexadecapole tree-build float)];
-	$categories{'sph-feedback'} = [qw(cooling feedbacklimit diffusion)];
+	$categories{'sph-feedback'} = [qw(cooling feedbacklimit diffusion nsmoothinner superbubble)];
 	$categories{'sph-viscosity'} = [qw(cullenalpha vsigvisc)];
-	$categories{'sph'} = [qw(sph-kernel rtforce damping)];
-	$categories{'gravity'} = [@{$categories{'force-test'}}, qw(changesoft dtadjust)];
+	$categories{'sph'} = [qw(sph-kernel rtforce damping splitgas)];
+	$categories{'gravity'} = [@{$categories{'force-test'}}, qw(changesoft dtadjust sidminter)];
 	
 	sub get_opts { return \%opts; }
 	sub get_categories { return \%categories; }
